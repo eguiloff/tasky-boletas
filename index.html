@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tasky · Boletas de Honorarios</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#F9F8FC;--surface:#fff;--border:#E4E1F0;--border2:#CBC7E0;
+  --purple:#534AB7;--purple-light:#EEEDFE;--purple-mid:#AFA9EC;
+  --text:#1A1825;--text2:#6B6880;--text3:#9B99AB;
+  --green-bg:#E1F5EE;--green-t:#085041;
+  --red-bg:#FCEBEB;--red-t:#791F1F;
+  --amber-bg:#FAEEDA;--amber-t:#633806;
+  --blue-bg:#E6F1FB;--blue-t:#0C447C;
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px}
+.app{max-width:1280px;margin:0 auto;padding:24px 20px}
+
+/* NAV */
+nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;flex-wrap:wrap;gap:12px;padding-bottom:20px;border-bottom:1px solid var(--border)}
+.logo{font-size:20px;font-weight:600;color:var(--purple);letter-spacing:-0.5px;display:flex;align-items:center;gap:10px}
+.logo-dot{width:8px;height:8px;border-radius:50%;background:var(--purple)}
+.logo span{color:var(--text);font-weight:300}
+.nav-right{display:flex;align-items:center;gap:12px}
+.save-status{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text3)}
+.save-dot{width:7px;height:7px;border-radius:50%;background:#D0CEEA;transition:background .3s}
+.save-dot.saved{background:#1D9E75}
+.save-dot.saving{background:var(--purple);animation:blink .7s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+
+/* AUTH WALL */
+#authWall{min-height:70vh;display:flex;align-items:center;justify-content:center}
+.auth-card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:48px 40px;max-width:420px;width:100%;text-align:center;box-shadow:0 4px 40px rgba(83,74,183,.08)}
+.auth-logo{width:72px;height:72px;border-radius:20px;background:var(--purple-light);display:flex;align-items:center;justify-content:center;margin:0 auto 24px;font-size:32px}
+.auth-title{font-size:24px;font-weight:600;margin-bottom:10px;letter-spacing:-0.5px}
+.auth-sub{font-size:14px;color:var(--text2);line-height:1.65;margin-bottom:32px}
+.btn-google{width:100%;padding:13px 20px;background:var(--purple);color:#fff;border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:opacity .15s;letter-spacing:-0.2px}
+.btn-google:hover{opacity:.88}
+.auth-note{margin-top:16px;font-size:12px;color:var(--text3);line-height:1.6}
+.user-pill{display:flex;align-items:center;gap:8px;padding:6px 14px;background:var(--purple-light);border-radius:20px;font-size:13px;color:var(--purple);font-weight:500}
+.btn-signout{font-size:12px;color:var(--text3);background:none;border:none;cursor:pointer;padding:4px 8px;border-radius:6px}
+.btn-signout:hover{color:var(--red-t);background:var(--red-bg)}
+
+/* KPI */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:24px}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px 20px;position:relative;overflow:hidden}
+.kpi::after{content:'';position:absolute;top:0;right:0;width:5px;height:100%;background:var(--accent)}
+.kpi-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.7px;color:var(--text3);margin-bottom:8px}
+.kpi-value{font-size:28px;font-weight:600;color:var(--kc);font-family:'DM Mono',monospace;letter-spacing:-1.5px;line-height:1}
+.kpi.amber{--accent:#EF9F27;--kc:#BA7517}
+.kpi.purple{--accent:var(--purple);--kc:var(--purple)}
+.kpi.green{--accent:#1D9E75;--kc:#0F6E56}
+.kpi.red{--accent:#E24B4A;--kc:#A32D2D}
+
+/* TOOLBAR */
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;align-items:center}
+.toolbar input,.toolbar select{height:38px;padding:0 12px;border:1px solid var(--border);border-radius:9px;background:var(--surface);color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;transition:border .15s}
+.toolbar input:focus,.toolbar select:focus{border-color:var(--purple)}
+.toolbar input{min-width:200px;flex:1;max-width:240px}
+.toolbar select{min-width:150px}
+.upload-label,.btn-action{display:inline-flex;align-items:center;gap:7px;height:38px;padding:0 16px;border:1px solid var(--border2);border-radius:9px;background:var(--surface);color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap;transition:all .15s}
+.upload-label:hover,.btn-action:hover{border-color:var(--purple);color:var(--purple)}
+.btn-action{border-color:var(--border)}
+.spacer{flex:1}
+
+/* TABLE */
+.table-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px;min-width:920px}
+thead th{padding:11px 14px;text-align:left;font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;border-bottom:1px solid var(--border);background:var(--bg);white-space:nowrap;cursor:pointer;user-select:none}
+thead th:hover{color:var(--purple)}
+tbody tr{border-bottom:1px solid var(--border);transition:background .1s}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:#F6F5FC}
+tbody tr.anulada{opacity:.4}
+tbody td{padding:10px 14px;vertical-align:middle}
+.badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap;letter-spacing:.2px}
+.b-si{background:var(--green-bg);color:var(--green-t)}
+.b-no{background:var(--red-bg);color:var(--red-t)}
+.b-pend{background:var(--amber-bg);color:var(--amber-t)}
+.b-anul{background:#EEEDF5;color:#888}
+.b-b2b{background:var(--blue-bg);color:var(--blue-t)}
+.b-b2c{background:var(--purple-light);color:var(--purple)}
+.b-rend{background:var(--amber-bg);color:var(--amber-t)}
+.nombre-cell{max-width:190px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;font-weight:500}
+.rut-cell{font-family:'DM Mono',monospace;font-size:11px;color:var(--text3)}
+.monto{font-family:'DM Mono',monospace;font-size:12px}
+.monto.main{font-weight:600}
+.monto.sec{color:var(--text3)}
+.inline-sel{font-family:'DM Sans',sans-serif;font-size:12px;padding:4px 8px;border:1px solid var(--border);border-radius:7px;background:var(--surface);color:var(--text);cursor:pointer;outline:none;transition:border .15s}
+.inline-sel:focus{border-color:var(--purple)}
+
+/* PAGER */
+.bottom-bar{display:flex;align-items:center;gap:8px;margin-top:16px;font-size:13px;color:var(--text2);flex-wrap:wrap}
+.pager{display:flex;gap:4px;align-items:center}
+.pg-btn{height:32px;min-width:32px;padding:0 8px;border:1px solid var(--border);border-radius:7px;background:var(--surface);color:var(--text);cursor:pointer;font-size:12px;font-family:'DM Sans',sans-serif;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.pg-btn:hover:not(:disabled){border-color:var(--purple);color:var(--purple)}
+.pg-btn:disabled{opacity:.3;cursor:default}
+.pg-btn.active{background:var(--purple);color:#fff;border-color:var(--purple)}
+.count-info{margin-left:auto;color:var(--text3);font-size:12px}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(26,24,37,.5);display:flex;align-items:center;justify-content:center;z-index:100;opacity:0;pointer-events:none;transition:opacity .2s}
+.modal-overlay.show{opacity:1;pointer-events:all}
+.modal{background:var(--surface);border-radius:16px;padding:28px 32px;max-width:460px;width:90%;transform:translateY(16px);transition:transform .2s}
+.modal-overlay.show .modal{transform:translateY(0)}
+.modal h3{font-size:17px;font-weight:600;margin-bottom:8px}
+.modal p{font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:20px}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end}
+.btn-cancel{padding:9px 18px;border:1px solid var(--border);border-radius:8px;background:none;font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer}
+.btn-confirm{padding:9px 18px;background:var(--purple);color:#fff;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer}
+
+/* TOAST */
+#toast{position:fixed;bottom:28px;right:28px;background:#1A1825;color:#fff;padding:13px 20px;border-radius:12px;font-size:13px;transform:translateY(80px);opacity:0;transition:all .3s;z-index:200;max-width:320px;line-height:1.4;box-shadow:0 8px 32px rgba(0,0,0,.25)}
+#toast.show{transform:translateY(0);opacity:1}
+
+/* EMPTY */
+.empty-state{text-align:center;padding:64px 20px;color:var(--text3)}
+.empty-state .icon{font-size:44px;margin-bottom:14px}
+.empty-state p{font-size:15px;color:var(--text2);margin-bottom:4px}
+
+#mainApp{display:none}
+</style>
+</head>
+<body>
+<div class="app">
+  <nav>
+    <div class="logo">
+      <div class="logo-dot"></div>
+      Tasky <span>· Boletas de Honorarios</span>
+    </div>
+    <div class="nav-right">
+      <div class="save-status" id="saveStatus">
+        <div class="save-dot" id="saveDot"></div>
+        <span id="saveText"></span>
+      </div>
+      <div id="authArea">
+        <button class="btn-google" onclick="signIn()" style="width:auto;padding:8px 18px;font-size:13px;border-radius:9px">
+          <svg width="16" height="16" viewBox="0 0 24 24"><path fill="white" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="white" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="white" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="white" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+          Conectar Google
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- AUTH WALL -->
+  <div id="authWall">
+    <div class="auth-card">
+      <div class="auth-logo">📋</div>
+      <div class="auth-title">Administrador de Boletas</div>
+      <div class="auth-sub">Inicia sesión con Google para acceder al sistema de boletas de Tasky. Tus datos se guardan en Google Drive y están disponibles desde cualquier dispositivo.</div>
+      <button class="btn-google" onclick="signIn()">
+        <svg width="18" height="18" viewBox="0 0 24 24"><path fill="white" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="white" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="white" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="white" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+        Ingresar con Google
+      </button>
+      <p class="auth-note">Los datos se guardan en tu Google Drive como archivo privado.<br>Solo tú y quienes invites pueden acceder.</p>
+    </div>
+  </div>
+
+  <!-- MAIN APP -->
+  <div id="mainApp">
+    <div class="kpi-grid">
+      <div class="kpi amber"><div class="kpi-label">$ por pagar (líquido)</div><div class="kpi-value" id="kPorPagar">—</div></div>
+      <div class="kpi purple"><div class="kpi-label">Boletas vigentes</div><div class="kpi-value" id="kVig">—</div></div>
+      <div class="kpi green"><div class="kpi-label">Boletas pagadas</div><div class="kpi-value" id="kPag">—</div></div>
+      <div class="kpi red"><div class="kpi-label">Boletas pendientes</div><div class="kpi-value" id="kPend">—</div></div>
+    </div>
+
+    <div class="toolbar">
+      <input type="text" id="buscar" placeholder="Buscar tasker, RUT, empresa…" oninput="applyFilters()">
+      <select id="fEmpresa" onchange="applyFilters()"><option value="">Todas las empresas</option></select>
+      <select id="fPagado" onchange="applyFilters()">
+        <option value="">Estado tasker</option>
+        <option value="Si">✓ Pagado</option>
+        <option value="No">✗ No pagado</option>
+        <option value="Pendiente">⏳ Pendiente</option>
+        <option value="Anulada">Anulada</option>
+      </select>
+      <select id="fEmpPago" onchange="applyFilters()">
+        <option value="">Empresa pagó</option>
+        <option value="Si">Sí</option>
+        <option value="No">No</option>
+        <option value="Pendiente">Pendiente</option>
+      </select>
+      <select id="fCat" onchange="applyFilters()">
+        <option value="">Categoría</option>
+        <option value="B2B">B2B</option>
+        <option value="B2C">B2C</option>
+        <option value="Rendiciones">Rendiciones</option>
+      </select>
+      <div class="spacer"></div>
+      <label class="upload-label" for="csvInput">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        Subir CSV / Excel
+      </label>
+      <input type="file" id="csvInput" accept=".csv,.xlsx,.xls" style="display:none" onchange="importFile(this)">
+      <button class="btn-action" onclick="exportCSV()">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Exportar CSV
+      </button>
+      <button class="btn-action" onclick="showMarkModal()" style="color:var(--green-t);border-color:var(--green-bg)">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        Marcar empresa pagada
+      </button>
+    </div>
+
+    <div class="table-card">
+      <table>
+        <thead>
+          <tr>
+            <th onclick="sortBy('boleta')">N° Boleta</th>
+            <th onclick="sortBy('fecha')">Fecha</th>
+            <th onclick="sortBy('nombre')">Tasker</th>
+            <th>RUT</th>
+            <th onclick="sortBy('bruto')">Bruto</th>
+            <th onclick="sortBy('liquido')">Líquido</th>
+            <th onclick="sortBy('empresa')">Empresa</th>
+            <th>Empresa pagó</th>
+            <th>Tasker pagado</th>
+            <th>N° Nómina</th>
+            <th>Categoría</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+      <div id="emptyState" class="empty-state" style="display:none">
+        <div class="icon">🔍</div>
+        <p>Sin resultados para estos filtros</p>
+      </div>
+    </div>
+
+    <div class="bottom-bar">
+      <div class="pager" id="pagerDiv"></div>
+      <div class="count-info" id="countInfo"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Marcar empresa pagada -->
+<div class="modal-overlay" id="markModal">
+  <div class="modal">
+    <h3>Marcar empresa como pagada</h3>
+    <p>Selecciona la empresa y todas sus boletas vigentes quedarán marcadas como "Pagado".</p>
+    <select id="markEmpresa" class="inline-sel" style="width:100%;height:40px;margin-bottom:20px;font-size:14px"></select>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">Cancelar</button>
+      <button class="btn-confirm" onclick="confirmMarkEmpresa()">Marcar como pagada</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<!-- ═══════════════════════════════════════════════════════════
+     GOOGLE IDENTITY SERVICES + DRIVE API
+     ══════════════════════════════════════════════════════════ -->
+<script>
+// ─────────────────────────────────────────────────────────────
+// CONFIGURACIÓN GOOGLE — reemplaza con tus credenciales
+// Ver instrucciones al final del HTML
+// ─────────────────────────────────────────────────────────────
+const GOOGLE_CLIENT_ID  = 'TU_CLIENT_ID.apps.googleusercontent.com';
+const DRIVE_FILE_NAME   = 'tasky_boletas.json';
+const DRIVE_MIME        = 'application/json';
+const SCOPES            = 'https://www.googleapis.com/auth/drive.appdata';
+
+let gToken  = null;
+let driveFileId = null;
+let allData = [];
+let filtered = [];
+let currentPage = 1;
+let sortField = 'fecha';
+let sortDir = 1;
+const PAGE = 25;
+let saveTimer = null;
+
+// ── AUTH ─────────────────────────────────────────────────────
+function signIn() {
+  /* Google Identity Services one-tap */
+  if (typeof google === 'undefined') {
+    // Fallback: use localStorage demo mode when GIS not loaded
+    demoSignIn();
+    return;
+  }
+  const client = google.accounts.oauth2.initTokenClient({
+    client_id: GOOGLE_CLIENT_ID,
+    scope: SCOPES,
+    callback: (resp) => {
+      if (resp.error) { showToast('Error al conectar Google: ' + resp.error); return; }
+      gToken = resp.access_token;
+      localStorage.setItem('tasky_gtoken', gToken);
+      onSignedIn('Usuario Google');
+    }
+  });
+  client.requestAccessToken();
+}
+
+function demoSignIn() {
+  // localStorage demo mode (works without Google credentials configured)
+  const name = prompt('Ingresa tu nombre para el sistema:', localStorage.getItem('tasky_user') || 'Administrador');
+  if (!name) return;
+  localStorage.setItem('tasky_user', name);
+  onSignedIn(name);
+}
+
+function signOut() {
+  gToken = null;
+  localStorage.removeItem('tasky_gtoken');
+  localStorage.removeItem('tasky_user');
+  document.getElementById('mainApp').style.display = 'none';
+  document.getElementById('authWall').style.display = 'flex';
+  document.getElementById('authArea').innerHTML = `<button class="btn-google" onclick="signIn()" style="width:auto;padding:8px 18px;font-size:13px;border-radius:9px">
+    <svg width="16" height="16" viewBox="0 0 24 24"><path fill="white" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/></svg>
+    Conectar Google
+  </button>`;
+}
+
+function onSignedIn(name) {
+  document.getElementById('authWall').style.display = 'none';
+  document.getElementById('mainApp').style.display = 'block';
+  document.getElementById('authArea').innerHTML = `
+    <div class="user-pill">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      ${name}
+    </div>
+    <button class="btn-signout" onclick="signOut()">Salir</button>`;
+  loadData();
+}
+
+// ── AUTO-RESTORE SESSION ──────────────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  const savedUser = localStorage.getItem('tasky_user');
+  const savedToken = localStorage.getItem('tasky_gtoken');
+  if (savedUser) { onSignedIn(savedUser); return; }
+  if (savedToken) { gToken = savedToken; onSignedIn('Usuario Google'); }
+});
+
+// ── DRIVE API ─────────────────────────────────────────────────
+async function driveRequest(url, method, body) {
+  const headers = { 'Authorization': 'Bearer ' + gToken };
+  if (body && typeof body === 'object' && !(body instanceof FormData)) {
+    headers['Content-Type'] = 'application/json';
+    body = JSON.stringify(body);
+  }
+  const res = await fetch(url, { method: method || 'GET', headers, body });
+  if (!res.ok) throw new Error('Drive API error ' + res.status);
+  return res.json();
+}
+
+async function findOrCreateFile() {
+  if (!gToken) return null;
+  try {
+    const list = await driveRequest(
+      `https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&q=name='${DRIVE_FILE_NAME}'&fields=files(id)`
+    );
+    if (list.files && list.files.length > 0) {
+      driveFileId = list.files[0].id;
+      return driveFileId;
+    }
+    // Create new
+    const meta = await driveRequest('https://www.googleapis.com/drive/v3/files', 'POST', {
+      name: DRIVE_FILE_NAME,
+      parents: ['appDataFolder'],
+      mimeType: DRIVE_MIME
+    });
+    driveFileId = meta.id;
+    return driveFileId;
+  } catch(e) { console.warn('Drive unavailable, using localStorage'); return null; }
+}
+
+async function readFromDrive() {
+  if (!driveFileId) return null;
+  try {
+    const res = await fetch(
+      `https://www.googleapis.com/drive/v3/files/${driveFileId}?alt=media`,
+      { headers: { Authorization: 'Bearer ' + gToken } }
+    );
+    if (!res.ok) return null;
+    return await res.json();
+  } catch(e) { return null; }
+}
+
+async function saveToDrive(data) {
+  const json = JSON.stringify(data);
+  if (driveFileId && gToken) {
+    try {
+      await fetch(
+        `https://www.googleapis.com/upload/drive/v3/files/${driveFileId}?uploadType=media`,
+        { method: 'PATCH', headers: { Authorization: 'Bearer ' + gToken, 'Content-Type': DRIVE_MIME }, body: json }
+      );
+      return;
+    } catch(e) {}
+  }
+  // localStorage fallback
+  localStorage.setItem('tasky_data', json);
+}
+
+// ── DATA LIFECYCLE ────────────────────────────────────────────
+async function loadData() {
+  setSave('loading');
+  await findOrCreateFile();
+  let data = null;
+  if (driveFileId) data = await readFromDrive();
+  if (!data) {
+    const local = localStorage.getItem('tasky_data');
+    if (local) { try { data = JSON.parse(local); } catch(e) {} }
+  }
+  allData = (data || SEED).filter(r => r.nombre && r.nombre !== 'nan' && r.boleta !== 'TOTAL VIGENTES');
+  setSave('saved');
+  updateEmpresas();
+  applyFilters();
+  updateKPIs();
+}
+
+function scheduleSave() {
+  clearTimeout(saveTimer);
+  setSave('saving');
+  saveTimer = setTimeout(async () => {
+    await saveToDrive(allData);
+    setSave('saved');
+  }, 900);
+}
+
+function setSave(state) {
+  const dot = document.getElementById('saveDot');
+  const txt = document.getElementById('saveText');
+  if (!dot) return;
+  dot.className = 'save-dot ' + (state === 'saved' ? 'saved' : state === 'saving' ? 'saving' : '');
+  txt.textContent = { saved: 'Guardado', saving: 'Guardando…', loading: 'Cargando…' }[state] || '';
+}
+
+// ── KPIs ──────────────────────────────────────────────────────
+function updateKPIs() {
+  const vig = allData.filter(r => r.estado !== 'ANUL');
+  const pag = vig.filter(r => r.pagado === 'Si');
+  const pend = vig.filter(r => r.pagado !== 'Si');
+  const pp = pend.reduce((s,r) => s + (r.liquido||0), 0);
+  document.getElementById('kPorPagar').textContent = '$' + Math.round(pp).toLocaleString('es-CL');
+  document.getElementById('kVig').textContent = vig.length;
+  document.getElementById('kPag').textContent = pag.length;
+  document.getElementById('kPend').textContent = pend.length;
+}
+
+// ── FILTERS & SORT ────────────────────────────────────────────
+function updateEmpresas() {
+  const sel = document.getElementById('fEmpresa');
+  const cur = sel.value;
+  const emps = [...new Set(allData.filter(r=>r.empresa).map(r=>r.empresa))].sort();
+  sel.innerHTML = '<option value="">Todas las empresas</option>' + emps.map(e=>`<option>${e}</option>`).join('');
+  sel.value = cur;
+}
+
+function sortBy(field) {
+  if (sortField === field) sortDir *= -1; else { sortField = field; sortDir = 1; }
+  applyFilters();
+}
+
+function applyFilters() {
+  const q  = document.getElementById('buscar').value.toLowerCase();
+  const em = document.getElementById('fEmpresa').value;
+  const pa = document.getElementById('fPagado').value;
+  const ep = document.getElementById('fEmpPago').value;
+  const ct = document.getElementById('fCat').value;
+  filtered = allData.filter(r => {
+    if (!r.nombre || r.nombre === 'nan') return false;
+    if (q  && !`${r.nombre}${r.rut}${r.empresa}${r.boleta}`.toLowerCase().includes(q)) return false;
+    if (em && r.empresa !== em) return false;
+    if (pa && (r.pagado||'Pendiente') !== pa) return false;
+    if (ep && (r.empresaPago||'Pendiente') !== ep) return false;
+    if (ct && r.categoria !== ct) return false;
+    return true;
+  });
+  filtered.sort((a,b) => {
+    let av = a[sortField]||'', bv = b[sortField]||'';
+    if (['bruto','liquido','retencion'].includes(sortField)) { av=+av; bv=+bv; }
+    return av > bv ? sortDir : av < bv ? -sortDir : 0;
+  });
+  currentPage = 1;
+  render();
+}
+
+// ── RENDER ────────────────────────────────────────────────────
+function fmt(n) { return '$' + Math.round(n||0).toLocaleString('es-CL'); }
+function fmtFecha(s) { return (s||'').replace(' 00:00:00','').replace(/^(\d{4})-(\d{2})-(\d{2})$/,'$3/$2/$1'); }
+
+function badgePag(v) {
+  const k = v||'Pendiente';
+  const m = {Si:'b-si',No:'b-no',Pendiente:'b-pend',Anulada:'b-anul'};
+  const l = {Si:'✓ Pagado',No:'✗ No pagado',Pendiente:'⏳ Pendiente',Anulada:'Anulada'};
+  return `<span class="badge ${m[k]||'b-pend'}">${l[k]||k}</span>`;
+}
+function badgeEP(v) {
+  if(v==='Si') return '<span class="badge b-si">Sí</span>';
+  if(v==='No') return '<span class="badge b-no">No</span>';
+  return '<span class="badge b-pend">Pendiente</span>';
+}
+function badgeCat(v) {
+  if(!v) return '<span class="badge b-anul" style="opacity:.5">—</span>';
+  const m={B2B:'b-b2b',B2C:'b-b2c',Rendiciones:'b-rend'};
+  return `<span class="badge ${m[v]||'b-anul'}">${v}</span>`;
+}
+
+function render() {
+  const total = filtered.length;
+  const pages = Math.max(1, Math.ceil(total/PAGE));
+  if (currentPage > pages) currentPage = pages;
+  const slice = filtered.slice((currentPage-1)*PAGE, currentPage*PAGE);
+
+  const empty = document.getElementById('emptyState');
+  const tb = document.getElementById('tbody');
+  if (!slice.length) { tb.innerHTML=''; empty.style.display='block'; }
+  else {
+    empty.style.display='none';
+    tb.innerHTML = slice.map(r => {
+      const idx = allData.indexOf(r);
+      const anul = r.estado === 'ANUL';
+      return `<tr class="${anul?'anulada':''}">
+        <td style="font-family:'DM Mono',monospace;font-size:12px;font-weight:500">${r.boleta||'—'}</td>
+        <td style="font-size:12px;color:var(--text3)">${fmtFecha(r.fecha)}</td>
+        <td class="nombre-cell" title="${r.nombre}">${r.nombre}</td>
+        <td class="rut-cell">${r.rut||'—'}</td>
+        <td class="monto main">${fmt(r.bruto)}</td>
+        <td class="monto sec">${fmt(r.liquido)}</td>
+        <td style="font-weight:500;font-size:13px">${r.empresa||'—'}</td>
+        <td>${anul?'<span class="badge b-anul">—</span>':badgeEP(r.empresaPago)}</td>
+        <td>${anul?'<span class="badge b-anul">Anulada</span>':`<select class="inline-sel" onchange="updateField(${idx},'pagado',this.value)">
+          <option value="Si"${r.pagado==='Si'?' selected':''}>✓ Pagado</option>
+          <option value="No"${r.pagado==='No'?' selected':''}>✗ No pagado</option>
+          <option value="Pendiente"${(!r.pagado||r.pagado==='Pendiente')?' selected':''}>⏳ Pendiente</option>
+        </select>`}</td>
+        <td style="font-size:12px;color:var(--text3)">${r.nomina||'—'}</td>
+        <td>${anul?'<span class="badge b-anul">—</span>':`<select class="inline-sel" onchange="updateField(${idx},'categoria',this.value)">
+          <option value=""${!r.categoria?' selected':''}>—</option>
+          <option value="B2B"${r.categoria==='B2B'?' selected':''}>B2B</option>
+          <option value="B2C"${r.categoria==='B2C'?' selected':''}>B2C</option>
+          <option value="Rendiciones"${r.categoria==='Rendiciones'?' selected':''}>Rendiciones</option>
+        </select>`}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  // Pager
+  let ph = `<button class="pg-btn" onclick="changePage(-1)" ${currentPage<=1?'disabled':''}>‹</button>`;
+  for (let p=Math.max(1,currentPage-2);p<=Math.min(pages,currentPage+2);p++)
+    ph += `<button class="pg-btn${p===currentPage?' active':''}" onclick="gotoPage(${p})">${p}</button>`;
+  ph += `<button class="pg-btn" onclick="changePage(1)" ${currentPage>=pages?'disabled':''}>›</button>`;
+  document.getElementById('pagerDiv').innerHTML = ph;
+  document.getElementById('countInfo').textContent = `${total} boleta${total!==1?'s':''}`;
+}
+
+function updateField(idx, field, val) {
+  allData[idx][field] = val;
+  updateKPIs();
+  scheduleSave();
+  showToast('Guardado ✓');
+}
+function changePage(d) { currentPage += d; render(); }
+function gotoPage(p) { currentPage = p; render(); }
+
+// ── IMPORT ────────────────────────────────────────────────────
+function importFile(input) {
+  const file = input.files[0]; if (!file) return;
+  const reader = new FileReader();
+  const ext = file.name.split('.').pop().toLowerCase();
+  if (ext === 'csv') {
+    reader.onload = e => parseAndLoad(e.target.result, file.name);
+    reader.readAsText(file, 'UTF-8');
+  } else {
+    reader.onload = e => {
+      const wb = XLSX.read(e.target.result, {type:'array'});
+      const csv = XLSX.utils.sheet_to_csv(wb.Sheets[wb.SheetNames[0]]);
+      parseAndLoad(csv, file.name);
+    };
+    reader.readAsArrayBuffer(file);
+  }
+  input.value = '';
+}
+
+function parseAndLoad(text, fname) {
+  const res = Papa.parse(text, {header:true, skipEmptyLines:true});
+  const newData = res.data.map((r,i) => ({
+    id: String(Date.now()+i),
+    boleta: r['N° Boleta']||r['Boleta']||r['boleta']||'',
+    estado: r['Estado']||r['estado']||'VIG',
+    fecha: r['Fecha']||r['fecha']||'',
+    rut: r['RUT Emisor']||r['RUT']||r['rut']||'',
+    nombre: r['Nombre / Razón Social']||r['Nombre']||r['nombre']||'',
+    bruto: parseFloat((r['Brutos']||r['Bruto']||r['bruto']||'0').toString().replace(/[^0-9.-]/g,''))||0,
+    retencion: parseFloat((r['Retención']||r['Retencion']||'0').toString().replace(/[^0-9.-]/g,''))||0,
+    liquido: parseFloat((r['Pagado (Líquido)']||r['Liquido']||r['liquido']||'0').toString().replace(/[^0-9.-]/g,''))||0,
+    empresa: r['Empresa']||r['empresa']||'',
+    pagado: (r['¿Pagado?']||r['Pagado']||r['pagado']||'Pendiente').trim(),
+    empresaPago: (r['¿Empresa Pago?']||r['EmpresaPago']||'Pendiente').trim(),
+    nomina: r['N° de Nomina']||r['Nomina']||'',
+    categoria: r['Categoría']||r['Categoria']||r['categoria']||''
+  })).filter(r => r.nombre && r.nombre !== 'nan' && r.rut && r.rut !== 'nan');
+  allData = newData;
+  updateEmpresas();
+  applyFilters();
+  updateKPIs();
+  saveToDrive(allData);
+  setSave('saved');
+  showToast(`✓ ${newData.length} boletas importadas desde ${fname}`);
+}
+
+// ── EXPORT ────────────────────────────────────────────────────
+function exportCSV() {
+  const cols = ['boleta','estado','fecha','rut','nombre','bruto','retencion','liquido','empresa','pagado','empresaPago','nomina','categoria'];
+  const hdr  = ['N° Boleta','Estado','Fecha','RUT Emisor','Nombre','Brutos','Retención','Líquido','Empresa','¿Pagado?','¿Empresa Pago?','N° Nómina','Categoría'];
+  const rows = [hdr, ...filtered.map(r => cols.map(c => r[c]||''))];
+  const csv  = rows.map(r => r.map(v=>`"${v.toString().replace(/"/g,'""')}"`).join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,\uFEFF' + encodeURIComponent(csv);
+  a.download = 'tasky_boletas.csv';
+  a.click();
+  showToast('CSV exportado ✓');
+}
+
+// ── MODAL: MARCAR EMPRESA ─────────────────────────────────────
+function showMarkModal() {
+  const emps = [...new Set(allData.filter(r=>r.empresa&&r.estado!=='ANUL').map(r=>r.empresa))].sort();
+  document.getElementById('markEmpresa').innerHTML = emps.map(e=>`<option>${e}</option>`).join('');
+  document.getElementById('markModal').classList.add('show');
+}
+function closeModal() { document.getElementById('markModal').classList.remove('show'); }
+function confirmMarkEmpresa() {
+  const emp = document.getElementById('markEmpresa').value;
+  let cnt = 0;
+  allData.forEach((r,i) => {
+    if (r.empresa===emp && r.estado!=='ANUL') { allData[i].pagado='Si'; cnt++; }
+  });
+  closeModal();
+  applyFilters();
+  updateKPIs();
+  scheduleSave();
+  showToast(`✓ ${cnt} boletas de ${emp} marcadas como pagadas`);
+}
+
+// ── TOAST ─────────────────────────────────────────────────────
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>t.classList.remove('show'), 2800);
+}
+
+// ── SEED DATA (Mayo 2026) ─────────────────────────────────────
+const SEED = [{"id":"0","boleta":"10","estado":"VIG","fecha":"03/05/2026","rut":"21148116-1","nombre":"FLORENCIA PAZ PEREZ ESPARZA","bruto":25000,"retencion":3813,"liquido":21187,"empresa":"EXTRALIFE","pagado":"Pendiente","empresaPago":"Pendiente","nomina":"","categoria":"B2B"},{"id":"1","boleta":"6","estado":"VIG","fecha":"03/05/2026","rut":"21585400-0","nombre":"TONKA MARGARITA SIMUNOVIC REBO","bruto":24000,"retencion":3660,"liquido":20340,"empresa":"RUBRA","pagado":"No","empresaPago":"Si","nomina":"","categoria":"B2B"},{"id":"2","boleta":"5","estado":"VIG","fecha":"03/05/2026","rut":"22242203-5","nombre":"RAFAEL ALEJANDRO ZENKLUSSEN AL","bruto":28000,"retencion":4270,"liquido":23730,"empresa":"FAZT","pagado":"Si","empresaPago":"Si","nomina":"","categoria":"B2B"},{"id":"3","boleta":"6","estado":"VIG","fecha":"03/05/2026","rut":"22251536-K","nombre":"ALONSO FERNANDO ABARCA FIERRO","bruto":27500,"retencion":4194,"liquido":23306,"empresa":"EARLY","pagado":"Pendiente","empresaPago":"Pendiente","nomina":"","categoria":"B2B"},{"id":"4","boleta":"1","estado":"VIG","fecha":"04/05/2026","rut":"21533926-2","nombre":"FRANCISCA PAZ CASTRO SANHUEZA","bruto":42000,"retencion":6405,"liquido":35595,"empresa":"IMPORTADORA HEVIA","pagado":"Si","empresaPago":"Si","nomina":"","categoria":"B2C"},{"id":"5","boleta":"7","estado":"VIG","fecha":"04/05/2026","rut":"21670088-0","nombre":"BALTAZAR CHACON GALVEZ","bruto":82950,"retencion":12650,"liquido":70300,"empresa":"BCOMMS","pagado":"Pendiente","empresaPago":"Pendiente","nomina":"","categoria":"B2B"},{"id":"6","boleta":"3","estado":"VIG","fecha":"04/05/2026","rut":"21823611-1","nombre":"TABATA KUSCEVIC PRIETO","bruto":66000,"retencion":10065,"liquido":55935,"empresa":"BCOMMS","pagado":"Pendiente","empresaPago":"Pendiente","nomina":"","categoria":"B2B"},{"id":"7","boleta":"27","estado":"VIG","fecha":"05/05/2026","rut":"18408049-4","nombre":"MARCELO ANDRES MORALES BRICENO","bruto":42000,"retencion":6405,"liquido":35595,"empresa":"IMPORTADORA HEVIA","pagado":"Si","empresaPago":"Si","nomina":"","categoria":"B2C"},{"id":"8","boleta":"7","estado":"VIG","fecha":"05/05/2026","rut":"20297336-1","nombre":"JORGE IGNACIO ALVAREZ RODRIGUE","bruto":84000,"retencion":12810,"liquido":71190,"empresa":"IMPORTADORA HEVIA","pagado":"Si","empresaPago":"Si","nomina":"","categoria":"B2C"},{"id":"9","boleta":"2","estado":"VIG","fecha":"05/05/2026","rut":"20431359-8","nombre":"BENJAMIN ANDRES ETCHEGOYEN VIA","bruto":84000,"retencion":12810,"liquido":71190,"empresa":"IMPORTADORA HEVIA","pagado":"Si","empresaPago":"Si","nomina":"","categoria":"B2C"},{"id":"10","boleta":"3","estado":"VIG","fecha":"05/05/2026","rut":"21182533-2","nombre":"DIEGO ANDRES MIRANDA STANGE","bruto":27296,"retencion":4163,"liquido":23133,"empresa":"B2C","pagado":"Si","empresaPago":"Pendiente","nomina":"","categoria":"B2C"},{"id":"11","boleta":"1","estado":"VIG","fecha":"05/05/2026","rut":"21185740-4","nombre":"BRUNO ALEJANDRO BIGNON ABARCIA","bruto":42000,"retencion":6405,"liquido":35595,"empresa":"IMPORTADORA HEVIA","pagado":"Si","empresaPago":"Si","nomina":"","categoria":"B2C"},{"id":"12","boleta":"21","estado":"VIG","fecha":"05/05/2026","rut":"21534018-K","nombre":"ANTONIA FERNANDA PAVEZ URBINA","bruto":210000,"retencion":32025,"liquido":177975,"empresa":"THE WALLAS GROUP","pagado":"No","empresaPago":"Pendiente","nomina":"","categoria":"B2B"},{"id":"13","boleta":"108","estado":"VIG","fecha":"05/05/2026","rut":"21751283-2","nombre":"VALENTINA ANDREA ZAVALA PONCE","bruto":290345,"retencion":44278,"liquido":246067,"empresa":"B2C","pagado":"Si","empresaPago":"Pendiente","nomina":"","categoria":"B2C"},{"id":"14","boleta":"1","estado":"VIG","fecha":"05/05/2026","rut":"21960021-6","nombre":"CLARA FERNANDEZ DE ROTA RILLON","bruto":30000,"retencion":4575,"liquido":25425,"empresa":"CENCOSUD","pagado":"No","empresaPago":"No","nomina":"","categoria":"B2C"},{"id":"15","boleta":"19","estado":"VIG","fecha":"06/05/2026","rut":"21247421-5","nombre":"CRISTOBAL MANUEL MAC LEAN ACEV","bruto":27296,"retencion":4163,"liquido":23133,"empresa":"B2C","pagado":"Si","empresaPago":"Pendiente","nomina":"","categoria":"B2C"},{"id":"16","boleta":"79","estado":"VIG","fecha":"07/05/2026","rut":"20117693-K","nombre":"JOAQUIN EMILIO ESTEVEZ OSORIO","bruto":156800,"retencion":23912,"liquido":132888,"empresa":"FAZT","pagado":"Si","empresaPago":"Si","nomina":"","categoria":"B2B"},{"id":"17","boleta":"80","estado":"ANUL","fecha":"07/05/2026","rut":"20117693-K","nombre":"JOAQUIN EMILIO ESTEVEZ OSORIO","bruto":236600,"retencion":36082,"liquido":200518,"empresa":"FAZT","pagado":"Anulada","empresaPago":"Si","nomina":"","categoria":""},{"id":"18","boleta":"81","estado":"ANUL","fecha":"07/05/2026","rut":"20117693-K","nombre":"JOAQUIN EMILIO ESTEVEZ OSORIO","bruto":244290,"retencion":37254,"liquido":207036,"empresa":"FAZT","pagado":"Anulada","empresaPago":"Si","nomina":"","categoria":""},{"id":"20","boleta":"10","estado":"VIG","fecha":"10/05/2026","rut":"20964470-3","nombre":"ESTEFANIA DEL PILAR DONOSO LEI","bruto":27500,"retencion":4194,"liquido":23306,"empresa":"CENCOSUD","pagado":"No","empresaPago":"No","nomina":"","categoria":"B2C"},{"id":"22","boleta":"1","estado":"VIG","fecha":"10/05/2026","rut":"21667668-8","nombre":"TANIA FERNANDA MARCELA SARMIEN","bruto":27500,"retencion":4194,"liquido":23306,"empresa":"CENCOSUD","pagado":"No","empresaPago":"No","nomina":"","categoria":"B2C"},{"id":"23","boleta":"33","estado":"VIG","fecha":"10/05/2026","rut":"26002523-6","nombre":"FABRIZIO ALEXANDER ARIAS TERRO","bruto":32500,"retencion":4956,"liquido":27544,"empresa":"TRES BARRILES","pagado":"No","empresaPago":"No","nomina":"","categoria":"B2C"},{"id":"25","boleta":"1","estado":"VIG","fecha":"11/05/2026","rut":"21291870-9","nombre":"JOAQUIN ANDRES MANOSALVA MICHE","bruto":105000,"retencion":16013,"liquido":88987,"empresa":"THE WALLAS GROUP","pagado":"No","empresaPago":"Pendiente","nomina":"","categoria":"B2B"},{"id":"27","boleta":"5","estado":"VIG","fecha":"11/05/2026","rut":"21385339-2","nombre":"MARIANA DAWSON BRACAMONTE","bruto":70000,"retencion":10675,"liquido":59325,"empresa":"EXTRALIFE","pagado":"No","empresaPago":"Pendiente","nomina":"","categoria":"B2B"},{"id":"28","boleta":"10","estado":"VIG","fecha":"11/05/2026","rut":"21540218-5","nombre":"ANTONELLA PIA SFRASANI HERRERA","bruto":140000,"retencion":21350,"liquido":118650,"empresa":"EXTRALIFE","pagado":"No","empresaPago":"Pendiente","nomina":"","categoria":"B2B"},{"id":"32","boleta":"149","estado":"VIG","fecha":"12/05/2026","rut":"19955297-K","nombre":"CATALINA PAZ ILLESCA FARINA","bruto":192500,"retencion":29356,"liquido":163144,"empresa":"CENCOSUD","pagado":"No","empresaPago":"No","nomina":"","categoria":"B2C"},{"id":"33","boleta":"4","estado":"VIG","fecha":"12/05/2026","rut":"19961478-9","nombre":"GERALDINE CINDY RIVEROS DIAZ","bruto":314000,"retencion":47885,"liquido":266115,"empresa":"CENCOSUD","pagado":"No","empresaPago":"No","nomina":"","categoria":"B2C"},{"id":"36","boleta":"37","estado":"VIG","fecha":"12/05/2026","rut":"20781036-3","nombre":"FRANCHESCA ANTONIA ORELLANA VE","bruto":275000,"retencion":41938,"liquido":233062,"empresa":"CENCOSUD","pagado":"No","empresaPago":"No","nomina":"","categoria":"B2C"},{"id":"53","boleta":"20","estado":"VIG","fecha":"12/05/2026","rut":"21387960-K","nombre":"LUCIA BELEN ARANEDA MARIN","bruto":314000,"retencion":47885,"liquido":266115,"empresa":"CENCOSUD","pagado":"No","empresaPago":"No","nomina":"","categoria":"B2C"},{"id":"80","boleta":"1","estado":"VIG","fecha":"12/05/2026","rut":"26603655-8","nombre":"RASHELL ALEXANDRA ALBORNOS ROD","bruto":314000,"retencion":47885,"liquido":266115,"empresa":"CENCOSUD","pagado":"No","empresaPago":"No","nomina":"","categoria":"B2C"},{"id":"87","boleta":"2","estado":"VIG","fecha":"13/05/2026","rut":"21941091-3","nombre":"IGNACIA ISABEL PATINO CHAMORRO","bruto":314000,"retencion":47885,"liquido":266115,"empresa":"CENCOSUD","pagado":"No","empresaPago":"No","nomina":"","categoria":"B2C"},{"id":"98","boleta":"82","estado":"VIG","fecha":"15/05/2026","rut":"20117693-K","nombre":"JOAQUIN EMILIO ESTEVEZ OSORIO","bruto":244389,"retencion":37269,"liquido":207120,"empresa":"FAZT","pagado":"No","empresaPago":"Si","nomina":"","categoria":"B2B"},{"id":"99","boleta":"1","estado":"VIG","fecha":"15/05/2026","rut":"20649490-5","nombre":"SEBASTIAN IGNACIO LEIGHTON MOR","bruto":45000,"retencion":6863,"liquido":38137,"empresa":"CANTECH","pagado":"No","empresaPago":"Pendiente","nomina":"","categoria":"B2B"},{"id":"124","boleta":"1","estado":"VIG","fecha":"16/05/2026","rut":"20501822-0","nombre":"FERNANDO ALEJANDRO NUNEZ CORTE","bruto":44000,"retencion":6710,"liquido":37290,"empresa":"TELRAD CHILE SA","pagado":"No","empresaPago":"No","nomina":"","categoria":"B2B"},{"id":"125","boleta":"29","estado":"VIG","fecha":"16/05/2026","rut":"20946195-1","nombre":"CAMILA ISIDORA DROGUETT ZEGERS","bruto":44000,"retencion":6710,"liquido":37290,"empresa":"TELRAD CHILE SA","pagado":"No","empresaPago":"No","nomina":"","categoria":"B2B"},{"id":"163","boleta":"7","estado":"VIG","fecha":"19/05/2026","rut":"20552352-9","nombre":"LYSETTE TIARE MORAN ALVAREZ","bruto":44000,"retencion":6710,"liquido":37290,"empresa":"TELRAD CHILE SA","pagado":"No","empresaPago":"No","nomina":"","categoria":"B2B"},{"id":"164","boleta":"20","estado":"VIG","fecha":"19/05/2026","rut":"21247421-5","nombre":"CRISTOBAL MANUEL MAC LEAN ACEV","bruto":141582,"retencion":21591,"liquido":119991,"empresa":"SANTA RITA","pagado":"No","empresaPago":"Pendiente","nomina":"","categoria":"B2C"},{"id":"167","boleta":"36","estado":"VIG","fecha":"30/05/2026","rut":"21314169-4","nombre":"CRISTOBAL ALEJANDRO SALAZAR HI","bruto":18600,"retencion":2837,"liquido":15763,"empresa":"EARLY","pagado":"Pendiente","empresaPago":"Pendiente","nomina":"","categoria":"B2B"}];
+</script>
+
+<!-- Google Identity Services (carga después del script principal) -->
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+
+<!--
+╔══════════════════════════════════════════════════════════════╗
+║  INSTRUCCIONES PARA PUBLICAR EN GITHUB PAGES                 ║
+╠══════════════════════════════════════════════════════════════╣
+║                                                              ║
+║  PASO 1 — Crear repositorio en GitHub                        ║
+║  1. Ve a github.com → "New repository"                       ║
+║  2. Nombre: tasky-boletas (o el que quieras)                 ║
+║  3. Márcalo como Público                                      ║
+║  4. Crea el repo                                             ║
+║                                                              ║
+║  PASO 2 — Subir este archivo                                 ║
+║  1. En el repo, click "Add file" → "Upload files"            ║
+║  2. Sube este index.html                                     ║
+║  3. Commit changes                                           ║
+║                                                              ║
+║  PASO 3 — Activar GitHub Pages                               ║
+║  1. Settings → Pages                                         ║
+║  2. Source: Deploy from branch → main → / (root)             ║
+║  3. Save                                                     ║
+║  4. Tu link: https://TU_USUARIO.github.io/tasky-boletas      ║
+║                                                              ║
+║  La app funciona DE INMEDIATO con localStorage.              ║
+║                                                              ║
+║  OPCIONAL — Activar Google Drive (sync entre dispositivos)   ║
+║  1. Ir a console.cloud.google.com                            ║
+║  2. Nuevo proyecto → Habilitar "Google Drive API"            ║
+║  3. Credenciales → OAuth 2.0 → Web App                       ║
+║  4. Authorized origins: https://TU_USUARIO.github.io         ║
+║  5. Copiar el Client ID                                      ║
+║  6. Reemplazar 'TU_CLIENT_ID.apps.googleusercontent.com'     ║
+║     por tu Client ID real en este archivo                    ║
+║  7. Re-subir el archivo                                      ║
+║                                                              ║
+╚══════════════════════════════════════════════════════════════╝
+-->
+</body>
+</html>
