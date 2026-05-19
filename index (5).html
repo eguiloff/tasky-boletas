@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tasky · Boletas</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#F0EEFF;--s:#fff;--b:#DDD9FF;--b2:#B8B0FF;
+  --p:#6B5CE7;--pd:#5548C8;--pl:#EEECFF;--pm:#C4BEFF;
+  --t:#1C1740;--t2:#5A5280;--t3:#9990C8;
+  --gb:#E6F5EC;--gt:#1A6B3A;
+  --rb:#FEF0F0;--rt:#C0392B;
+  --ab:#FFF8EC;--at:#B85C00;
+  --lb:#EEF2FF;--lt:#3730A3;
+}
+body{font-family:'Poppins',sans-serif;background:var(--bg);color:var(--t);font-size:13px;min-height:100vh}
+.app{max-width:1280px;margin:0 auto;padding:20px}
+
+nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;padding-bottom:16px;border-bottom:1px solid var(--b);flex-wrap:wrap;gap:8px}
+.logo-wrap{display:flex;align-items:center;gap:10px}
+.logo-badge{background:var(--p);padding:7px 16px 7px 12px;border-radius:12px;display:flex;align-items:center;gap:8px}
+.logo-badge svg{width:26px;height:26px}
+.logo-badge span{font-weight:700;font-size:16px;color:#fff;letter-spacing:-.3px}
+.logo-sub{font-size:12px;color:var(--t3);font-weight:400}
+.nr{display:flex;align-items:center;gap:10px}
+.ss{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--t3)}
+.dot{width:6px;height:6px;border-radius:50%;background:#ccc;transition:background .3s}
+.dot.ok{background:#22C55E}
+.dot.go{background:var(--p);animation:bl .7s infinite}
+@keyframes bl{0%,100%{opacity:1}50%{opacity:.2}}
+.pill{display:flex;align-items:center;gap:6px;padding:5px 14px;background:var(--pl);border-radius:20px;font-size:12px;color:var(--p);font-weight:600}
+.btn-out{font-size:11px;color:var(--t3);background:none;border:none;cursor:pointer;padding:3px 8px;border-radius:5px;font-family:'Poppins',sans-serif}
+.btn-out:hover{color:var(--rt)}
+
+#aw{min-height:65vh;display:flex;align-items:center;justify-content:center}
+#ma{display:none}
+.ac{background:var(--s);border:1px solid var(--b);border-radius:20px;padding:44px 40px;max-width:400px;width:100%;text-align:center;box-shadow:0 8px 40px rgba(107,92,231,.12)}
+.ac-logo{background:var(--p);padding:14px 28px 14px 20px;border-radius:14px;display:inline-flex;align-items:center;gap:10px;margin-bottom:24px}
+.ac-logo svg{width:36px;height:36px}
+.ac-logo span{font-weight:700;font-size:22px;color:#fff;letter-spacing:-.5px}
+.at{font-size:20px;font-weight:600;margin-bottom:8px;color:var(--t)}
+.as{font-size:13px;color:var(--t2);line-height:1.6;margin-bottom:24px}
+.ni{width:100%;padding:12px 14px;border:1.5px solid var(--b2);border-radius:10px;font-family:'Poppins',sans-serif;font-size:14px;outline:none;color:var(--t);margin-bottom:12px;transition:border .15s;background:#fff}
+.ni:focus{border-color:var(--p);box-shadow:0 0 0 3px rgba(107,92,231,.15)}
+.bm{width:100%;padding:13px;background:var(--p);color:#fff;border:none;border-radius:10px;font-family:'Poppins',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all .15s}
+.bm:hover{background:var(--pd)}
+.an{margin-top:10px;font-size:11px;color:var(--t3)}
+
+.kg{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.kc{background:var(--s);border:1.5px solid var(--b);border-radius:14px;padding:16px 18px;border-left:4px solid var(--ka)}
+.kl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.7px;color:var(--t3);margin-bottom:6px}
+.kv{font-size:23px;font-weight:700;color:var(--kc);font-family:'DM Mono',monospace;letter-spacing:-1px}
+
+.tb{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;align-items:center}
+.tb input,.tb select{height:36px;padding:0 11px;border:1.5px solid var(--b);border-radius:9px;background:var(--s);color:var(--t);font-family:'Poppins',sans-serif;font-size:12px;outline:none;transition:border .15s}
+.tb input:focus,.tb select:focus{border-color:var(--p)}
+.tb input{min-width:180px;flex:1;max-width:220px}
+.tb select{min-width:130px}
+.tk{display:inline-flex;align-items:center;gap:5px;height:36px;padding:0 14px;border:1.5px solid var(--b2);border-radius:9px;background:var(--s);color:var(--t2);font-family:'Poppins',sans-serif;font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap;transition:all .15s}
+.tk:hover{border-color:var(--p);color:var(--p);background:var(--pl)}
+.tk.g{color:var(--gt);border-color:#A7D7B8}
+.tk.g:hover{background:var(--gb)}
+
+.bulk{display:none;align-items:center;gap:8px;padding:10px 16px;background:var(--pl);border:1.5px solid var(--pm);border-radius:10px;margin-bottom:12px;font-size:12px;color:var(--p);font-weight:600;flex-wrap:wrap}
+.bulk.on{display:flex}
+.bb{padding:6px 14px;border-radius:7px;border:1.5px solid var(--p);background:var(--p);color:#fff;font-family:'Poppins',sans-serif;font-size:12px;font-weight:500;cursor:pointer;transition:all .15s}
+.bb:hover{background:var(--pd)}
+.bb.o{background:transparent;color:var(--p)}
+.bb.o:hover{background:var(--p);color:#fff}
+
+.tc{background:var(--s);border:1.5px solid var(--b);border-radius:14px;overflow:hidden;overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:900px}
+th{padding:10px 12px;text-align:left;font-size:10px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;border-bottom:1.5px solid var(--b);background:var(--bg);white-space:nowrap;cursor:pointer;font-family:'Poppins',sans-serif}
+th:hover{color:var(--p)}
+td{padding:9px 12px;border-bottom:1px solid var(--b);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#F5F3FF}
+tr.sl td{background:#EEECFF}
+tr.an{opacity:.4}
+.badge{display:inline-flex;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap}
+.bsi{background:var(--gb);color:var(--gt)}
+.bpe{background:var(--ab);color:var(--at)}
+.ban{background:#F0EFF8;color:#888}
+.bb2b{background:var(--lb);color:var(--lt)}
+.bb2c{background:var(--pl);color:var(--p)}
+.bred{background:var(--rb);color:var(--rt)}
+.mn{font-family:'DM Mono',monospace;font-size:11px;color:var(--t3)}
+select.is,input.is{font-family:'Poppins',sans-serif;font-size:11px;padding:4px 8px;border:1.5px solid var(--b);border-radius:7px;background:var(--s);color:var(--t);outline:none;transition:border .15s;cursor:pointer}
+select.is:focus,input.is:focus{border-color:var(--p)}
+input.is{width:60px;text-align:center;font-family:'DM Mono',monospace;cursor:text}
+input[type=checkbox]{accent-color:var(--p);cursor:pointer;width:14px;height:14px}
+
+.pgr{display:flex;align-items:center;gap:5px;margin-top:14px}
+.pgr button{height:30px;min-width:30px;padding:0 8px;border:1.5px solid var(--b);border-radius:7px;background:var(--s);color:var(--t);cursor:pointer;font-size:11px;font-family:'Poppins',sans-serif;transition:all .15s}
+.pgr button:hover:not(:disabled){border-color:var(--p);color:var(--p)}
+.pgr button.ac{background:var(--p);color:#fff;border-color:var(--p)}
+.pgr button:disabled{opacity:.3;cursor:default}
+.pgr .inf{margin-left:auto;font-size:11px;color:var(--t3)}
+
+.mdbg{display:none;position:fixed;inset:0;background:rgba(28,23,64,.5);align-items:center;justify-content:center;z-index:50}
+.mdbg.on{display:flex}
+.md{background:var(--s);border-radius:16px;padding:28px 32px;max-width:420px;width:90%;border:1.5px solid var(--b)}
+.md h3{font-size:16px;font-weight:600;margin-bottom:7px;color:var(--t)}
+.md p{font-size:12px;color:var(--t2);margin-bottom:16px;line-height:1.6}
+.mda{display:flex;gap:8px;justify-content:flex-end}
+.mc{padding:8px 16px;border-radius:8px;font-size:12px;cursor:pointer;border:1.5px solid var(--b);background:none;font-family:'Poppins',sans-serif;color:var(--t2)}
+.mok{background:var(--p);color:#fff;border-color:var(--p);font-weight:600}
+.mok:hover{background:var(--pd)}
+
+.toast{position:fixed;bottom:24px;right:24px;background:var(--t);color:#fff;padding:11px 18px;border-radius:10px;font-size:12px;font-family:'Poppins',sans-serif;opacity:0;transition:opacity .3s;pointer-events:none;z-index:99}
+.toast.on{opacity:1}
+</style>
+</head>
+<body>
+<div class="app">
+<nav>
+  <div class="logo-wrap">
+    <div class="logo-badge">
+      <svg viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="16" fill="#2E2640"/><path d="M9 17L13.5 22L23 11" stroke="#EAE6FF" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span>tasky</span>
+    </div>
+    <span class="logo-sub">boletas de honorarios</span>
+  </div>
+  <div class="nr">
+    <div class="ss"><div class="dot" id="dot"></div><span id="st"></span></div>
+    <div id="aa"><button class="bm" onclick="signIn()" style="width:auto;padding:7px 18px;font-size:12px;border-radius:9px">👤 Ingresar</button></div>
+  </div>
+</nav>
+
+<div id="aw">
+  <div class="ac">
+    <div class="ac-logo">
+      <svg viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="20" fill="#2E2640"/><path d="M11 21L17 28L29 14" stroke="#EAE6FF" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span>tasky</span>
+    </div>
+    <div class="at">Administrador de Boletas</div>
+    <div class="as">Ingresa tu nombre para acceder. Los datos se guardan automáticamente en este navegador.</div>
+    <input type="text" id="ni" class="ni" placeholder="Tu nombre" onkeydown="if(event.key==='Enter')signIn()">
+    <button class="bm" onclick="signIn()">Ingresar al sistema</button>
+    <p class="an">Datos guardados localmente en tu navegador</p>
+  </div>
+</div>
+
+<div id="ma">
+  <div class="kg">
+    <div class="kc" style="--ka:#E07800;--kc:#B85C00"><div class="kl">$ por pagar</div><div class="kv" id="kP">—</div></div>
+    <div class="kc" style="--ka:#6B5CE7;--kc:#6B5CE7"><div class="kl">Vigentes</div><div class="kv" id="kV">—</div></div>
+    <div class="kc" style="--ka:#22C55E;--kc:#1A6B3A"><div class="kl">Pagadas</div><div class="kv" id="kPg">—</div></div>
+    <div class="kc" style="--ka:#E07800;--kc:#B85C00"><div class="kl">Pendientes</div><div class="kv" id="kPd">—</div></div>
+  </div>
+
+  <div class="tb">
+    <input type="text" id="q" placeholder="Buscar tasker, RUT, empresa…" oninput="filt()">
+    <select id="fE" onchange="filt()"><option value="">Todas las empresas</option></select>
+    <select id="fP" onchange="filt()">
+      <option value="">Estado tasker</option>
+      <option value="Si">✓ Pagado</option>
+      <option value="Pendiente">⏳ Pendiente</option>
+      <option value="Anulada">✕ Anulada</option>
+    </select>
+    <select id="fEP" onchange="filt()">
+      <option value="">Empresa pagó</option>
+      <option value="Si">✓ Sí pagó</option>
+      <option value="Pendiente">⏳ Pendiente</option>
+    </select>
+    <select id="fC" onchange="filt()">
+      <option value="">Categoría</option>
+      <option value="B2B">B2B</option>
+      <option value="B2C">B2C</option>
+      <option value="Rendiciones">Rendiciones</option>
+    </select>
+    <label class="tk" for="fi">↑ Subir CSV / Excel</label>
+    <input type="file" id="fi" accept=".csv,.xlsx,.xls" style="display:none" onchange="importF(this)">
+    <button class="tk" onclick="expCSV()">↓ Exportar CSV</button>
+    <button class="tk g" onclick="showMod()">✓ Marcar empresa pagada</button>
+  </div>
+
+  <div class="bulk" id="bulk">
+    <span id="bct">0 seleccionadas</span>
+    <button class="bb" onclick="bMark('pagado','Si')">✓ Tasker pagado</button>
+    <button class="bb" onclick="bMark('empresaPago','Si')">✓ Empresa pagó</button>
+    <button class="bb" onclick="bMark('pagado','Anulada')" style="background:#fff;color:var(--rt);border-color:var(--rt)">✕ Anular</button>
+    <button class="bb o" onclick="clearSel()">Cancelar</button>
+  </div>
+
+  <div class="tc">
+    <table>
+      <thead><tr>
+        <th style="width:32px"><input type="checkbox" id="cbA" onchange="togAll(this)"></th>
+        <th onclick="srt('boleta')">N° Boleta</th>
+        <th onclick="srt('fecha')">Fecha</th>
+        <th onclick="srt('nombre')">Tasker</th>
+        <th>RUT</th>
+        <th onclick="srt('bruto')">Bruto</th>
+        <th onclick="srt('liquido')">Líquido</th>
+        <th onclick="srt('empresa')">Empresa</th>
+        <th>Empresa pagó</th>
+        <th>Tasker pagado</th>
+        <th>N° Nómina</th>
+        <th>Categoría</th>
+      </tr></thead>
+      <tbody id="tb"></tbody>
+    </table>
+    <div id="emp" style="display:none;text-align:center;padding:48px;color:var(--t3);font-size:14px">🔍 Sin resultados</div>
+  </div>
+  <div class="pgr" id="pgr"></div>
+</div>
+</div>
+
+<div class="mdbg" id="mod">
+  <div class="md">
+    <h3>Marcar empresa como pagada</h3>
+    <p>Todas las boletas vigentes de la empresa quedarán marcadas como pagadas.</p>
+    <select id="mE" class="is" style="width:100%;height:38px;margin-bottom:16px;font-size:13px"></select>
+    <div class="mda">
+      <button class="mc" onclick="closeMod()">Cancelar</button>
+      <button class="mc mok" onclick="confMod()">Marcar pagada</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+var SEED=[{id:0,boleta:"10",estado:"VIG",fecha:"03/05/2026",rut:"21148116-1",nombre:"FLORENCIA PAZ PEREZ ESPARZA",bruto:25000,retencion:3813,liquido:21187,empresa:"EXTRALIFE",pagado:"Pendiente",empresaPago:"Pendiente",nomina:"",categoria:"B2B"},{id:1,boleta:"6",estado:"VIG",fecha:"03/05/2026",rut:"21585400-0",nombre:"TONKA MARGARITA SIMUNOVIC REBO",bruto:24000,retencion:3660,liquido:20340,empresa:"RUBRA",pagado:"Pendiente",empresaPago:"Si",nomina:"",categoria:"B2B"},{id:2,boleta:"5",estado:"VIG",fecha:"03/05/2026",rut:"22242203-5",nombre:"RAFAEL ALEJANDRO ZENKLUSSEN AL",bruto:28000,retencion:4270,liquido:23730,empresa:"FAZT",pagado:"Si",empresaPago:"Si",nomina:"1234",categoria:"B2B"},{id:3,boleta:"6",estado:"VIG",fecha:"03/05/2026",rut:"22251536-K",nombre:"ALONSO FERNANDO ABARCA FIERRO",bruto:27500,retencion:4194,liquido:23306,empresa:"EARLY",pagado:"Pendiente",empresaPago:"Pendiente",nomina:"",categoria:"B2B"},{id:4,boleta:"1",estado:"VIG",fecha:"04/05/2026",rut:"21533926-2",nombre:"FRANCISCA PAZ CASTRO SANHUEZA",bruto:42000,retencion:6405,liquido:35595,empresa:"IMPORTADORA HEVIA",pagado:"Si",empresaPago:"Si",nomina:"5678",categoria:"B2C"},{id:5,boleta:"7",estado:"VIG",fecha:"04/05/2026",rut:"21670088-0",nombre:"BALTAZAR CHACON GALVEZ",bruto:82950,retencion:12650,liquido:70300,empresa:"BCOMMS",pagado:"Pendiente",empresaPago:"Pendiente",nomina:"",categoria:"B2B"},{id:6,boleta:"3",estado:"VIG",fecha:"04/05/2026",rut:"21823611-1",nombre:"TABATA KUSCEVIC PRIETO",bruto:66000,retencion:10065,liquido:55935,empresa:"BCOMMS",pagado:"Pendiente",empresaPago:"Pendiente",nomina:"",categoria:"B2B"},{id:7,boleta:"27",estado:"VIG",fecha:"05/05/2026",rut:"18408049-4",nombre:"MARCELO ANDRES MORALES BRICENO",bruto:42000,retencion:6405,liquido:35595,empresa:"IMPORTADORA HEVIA",pagado:"Si",empresaPago:"Si",nomina:"5678",categoria:"B2C"},{id:8,boleta:"7",estado:"VIG",fecha:"05/05/2026",rut:"20297336-1",nombre:"JORGE IGNACIO ALVAREZ RODRIGUE",bruto:84000,retencion:12810,liquido:71190,empresa:"IMPORTADORA HEVIA",pagado:"Si",empresaPago:"Si",nomina:"5678",categoria:"B2C"},{id:9,boleta:"21",estado:"VIG",fecha:"05/05/2026",rut:"21534018-K",nombre:"ANTONIA FERNANDA PAVEZ URBINA",bruto:210000,retencion:32025,liquido:177975,empresa:"THE WALLAS GROUP",pagado:"Pendiente",empresaPago:"Pendiente",nomina:"",categoria:"B2B"},{id:10,boleta:"108",estado:"VIG",fecha:"05/05/2026",rut:"21751283-2",nombre:"VALENTINA ANDREA ZAVALA PONCE",bruto:290345,retencion:44278,liquido:246067,empresa:"B2C",pagado:"Si",empresaPago:"Pendiente",nomina:"",categoria:"B2C"},{id:11,boleta:"1",estado:"VIG",fecha:"05/05/2026",rut:"21960021-6",nombre:"CLARA FERNANDEZ DE ROTA RILLON",bruto:30000,retencion:4575,liquido:25425,empresa:"CENCOSUD",pagado:"Pendiente",empresaPago:"Pendiente",nomina:"",categoria:"B2C"},{id:12,boleta:"80",estado:"ANUL",fecha:"07/05/2026",rut:"20117693-K",nombre:"JOAQUIN EMILIO ESTEVEZ OSORIO",bruto:236600,retencion:36082,liquido:200518,empresa:"FAZT",pagado:"Anulada",empresaPago:"Si",nomina:"",categoria:""},{id:13,boleta:"82",estado:"VIG",fecha:"15/05/2026",rut:"20117693-K",nombre:"JOAQUIN EMILIO ESTEVEZ OSORIO",bruto:244389,retencion:37269,liquido:207120,empresa:"FAZT",pagado:"Pendiente",empresaPago:"Si",nomina:"",categoria:"B2B"},{id:14,boleta:"149",estado:"VIG",fecha:"12/05/2026",rut:"19955297-K",nombre:"CATALINA PAZ ILLESCA FARINA",bruto:192500,retencion:29356,liquido:163144,empresa:"CENCOSUD",pagado:"Pendiente",empresaPago:"Pendiente",nomina:"",categoria:"B2C"},{id:15,boleta:"4",estado:"VIG",fecha:"12/05/2026",rut:"19961478-9",nombre:"GERALDINE CINDY RIVEROS DIAZ",bruto:314000,retencion:47885,liquido:266115,empresa:"CENCOSUD",pagado:"Pendiente",empresaPago:"Pendiente",nomina:"",categoria:"B2C"},{id:16,boleta:"37",estado:"VIG",fecha:"12/05/2026",rut:"20781036-3",nombre:"FRANCHESCA ANTONIA ORELLANA VE",bruto:275000,retencion:41938,liquido:233062,empresa:"CENCOSUD",pagado:"Pendiente",empresaPago:"Pendiente",nomina:"",categoria:"B2C"},{id:17,boleta:"29",estado:"VIG",fecha:"16/05/2026",rut:"20946195-1",nombre:"CAMILA ISIDORA DROGUETT ZEGERS",bruto:44000,retencion:6710,liquido:37290,empresa:"TELRAD CHILE SA",pagado:"Pendiente",empresaPago:"Pendiente",nomina:"",categoria:"B2B"},{id:18,boleta:"7",estado:"VIG",fecha:"19/05/2026",rut:"20552352-9",nombre:"LYSETTE TIARE MORAN ALVAREZ",bruto:44000,retencion:6710,liquido:37290,empresa:"TELRAD CHILE SA",pagado:"Pendiente",empresaPago:"Pendiente",nomina:"",categoria:"B2B"},{id:19,boleta:"36",estado:"VIG",fecha:"30/05/2026",rut:"21314169-4",nombre:"CRISTOBAL ALEJANDRO SALAZAR HI",bruto:18600,retencion:2837,liquido:15763,empresa:"EARLY",pagado:"Pendiente",empresaPago:"Pendiente",nomina:"",categoria:"B2B"}];
+
+var DATA=SEED.map(function(r){return Object.assign({},r);}),fData=[],page=1,sel=new Set(),sf="fecha",sdir=1;
+var PG=15,stmr=null;
+
+function fmt(n){return "$"+Math.round(n||0).toLocaleString("es-CL");}
+function ff(s){return (s||"").replace(" 00:00:00","").replace(/^(\d{4})-(\d{2})-(\d{2})$/,"$3/$2/$1");}
+
+function signIn(){
+  var v=document.getElementById("ni").value.trim()||localStorage.getItem("tk_u")||"Administrador";
+  localStorage.setItem("tk_u",v);onIn(v);
+}
+function onIn(n){
+  document.getElementById("aw").style.display="none";
+  document.getElementById("ma").style.display="block";
+  document.getElementById("aa").innerHTML='<div class="pill">&#128100; '+n+'</div><button class="btn-out" onclick="signOut()">Salir</button>';
+  loadD();
+}
+function signOut(){
+  localStorage.removeItem("tk_u");
+  document.getElementById("ma").style.display="none";
+  document.getElementById("aw").style.display="flex";
+  document.getElementById("aa").innerHTML='<button class="bm" onclick="signIn()" style="width:auto;padding:7px 18px;font-size:12px;border-radius:9px">Ingresar</button>';
+}
+window.addEventListener("DOMContentLoaded",function(){var u=localStorage.getItem("tk_u");if(u)onIn(u);});
+
+function setSave(s){
+  var d=document.getElementById("dot"),t=document.getElementById("st");
+  d.className="dot "+(s==="ok"?"ok":s==="go"?"go":"");
+  t.textContent=s==="ok"?"Guardado":s==="go"?"Guardando...":s==="ld"?"Cargando...":"";
+}
+function save(){
+  clearTimeout(stmr);setSave("go");
+  stmr=setTimeout(function(){localStorage.setItem("tk_d",JSON.stringify(DATA));setSave("ok");},800);
+}
+function loadD(){
+  setSave("ld");
+  var d=localStorage.getItem("tk_d");
+  if(d){try{DATA=JSON.parse(d);}catch(e){DATA=SEED.map(function(r){return Object.assign({},r);});}}
+  else{DATA=SEED.map(function(r){return Object.assign({},r);});}
+  DATA=DATA.filter(function(r){return r.nombre&&r.nombre!="nan"&&r.boleta&&String(r.boleta).indexOf("TOTAL")<0;});
+  setSave("ok");updE();filt();kpi();
+}
+
+function kpi(){
+  var v=DATA.filter(function(r){return r.estado!="ANUL";});
+  var p=v.filter(function(r){return r.pagado=="Si";});
+  var pd=v.filter(function(r){return r.pagado!="Si";});
+  var pp=pd.reduce(function(s,r){return s+(r.liquido||0);},0);
+  document.getElementById("kP").textContent=fmt(pp);
+  document.getElementById("kV").textContent=v.length;
+  document.getElementById("kPg").textContent=p.length;
+  document.getElementById("kPd").textContent=pd.length;
+}
+
+function updE(){
+  var s=document.getElementById("fE"),c=s.value;
+  var e=[];DATA.forEach(function(r){if(r.empresa&&e.indexOf(r.empresa)<0)e.push(r.empresa);});e.sort();
+  s.innerHTML='<option value="">Todas las empresas</option>'+e.map(function(x){return "<option>"+x+"</option>";}).join("");
+  s.value=c;
+}
+function srt(f){if(sf==f)sdir*=-1;else{sf=f;sdir=1;}filt();}
+function filt(){
+  var q=document.getElementById("q").value.toLowerCase();
+  var em=document.getElementById("fE").value,pa=document.getElementById("fP").value;
+  var ep=document.getElementById("fEP").value,ct=document.getElementById("fC").value;
+  fData=DATA.filter(function(r){
+    if(!r.nombre||r.nombre=="nan")return false;
+    if(q&&(r.nombre+r.rut+r.empresa+r.boleta).toLowerCase().indexOf(q)<0)return false;
+    if(em&&r.empresa!=em)return false;
+    if(pa&&(r.pagado||"Pendiente")!=pa)return false;
+    if(ep&&(r.empresaPago||"Pendiente")!=ep)return false;
+    if(ct&&r.categoria!=ct)return false;
+    return true;
+  });
+  fData.sort(function(a,b){var av=a[sf]||"",bv=b[sf]||"";if(sf=="bruto"||sf=="liquido"){av=+av;bv=+bv;}return av>bv?sdir:av<bv?-sdir:0;});
+  page=1;render();
+}
+
+function epS(i,v){
+  var x=v||"Pendiente";
+  var f="empresaPago";
+  return '<select class="is" onchange="upd('+i+',%f%,this.value)">'.replace("%f%",'"'+f+'"')+
+    '<option value="Si"'+(x=="Si"?" selected":"")+'>&#10003; Si pago</option>'+
+    '<option value="Pendiente"'+(x=="Pendiente"?" selected":"")+'>&#9203; Pendiente</option>'+
+    '</select>';
+}
+function pgS(i,v){
+  var x=v||"Pendiente";
+  var f="pagado";
+  return '<select class="is" onchange="upd('+i+',%f%,this.value)">'.replace("%f%",'"'+f+'"')+
+    '<option value="Si"'+(x=="Si"?" selected":"")+'>&#10003; Pagado</option>'+
+    '<option value="Pendiente"'+(x=="Pendiente"?" selected":"")+'>&#9203; Pendiente</option>'+
+    '<option value="Anulada"'+(x=="Anulada"?" selected":"")+'>&#10005; Anulada</option>'+
+    '</select>';
+}
+function catS(i,v){
+  var f="categoria";
+  return '<select class="is" onchange="upd('+i+',%f%,this.value)">'.replace("%f%",'"'+f+'"')+
+    '<option value=""'+(!v?" selected":"")+'>&#8212;</option>'+
+    '<option value="B2B"'+(v=="B2B"?" selected":"")+'>B2B</option>'+
+    '<option value="B2C"'+(v=="B2C"?" selected":"")+'>B2C</option>'+
+    '<option value="Rendiciones"'+(v=="Rendiciones"?" selected":"")+'>Rendiciones</option>'+
+    '</select>';
+}
+function nomI(i,v){
+  var f="nomina";
+  return '<input class="is" type="text" maxlength="4" placeholder="0000" value="'+(v||"")+'\" '+
+    'onchange="upd('+i+',%f%,this.value)" oninput="this.value=this.value.replace(/[^0-9]/g,\'\')">'.replace("%f%",'"'+f+'"');
+}
+
+function bdg(v){
+  if(v=="Si") return '<span class="badge bsi">&#10003; Pagado</span>';
+  if(v=="Anulada") return '<span class="badge ban">&#10005; Anulada</span>';
+  return '<span class="badge bpe">&#9203; Pendiente</span>';
+}
+function bdgEP(v){
+  if(v=="Si") return '<span class="badge bsi">&#10003; Si</span>';
+  return '<span class="badge bpe">&#9203; Pendiente</span>';
+}
+
+function render(){
+  var tot=fData.length,pgs=Math.max(1,Math.ceil(tot/PG));
+  if(page>pgs)page=pgs;
+  var sl=fData.slice((page-1)*PG,page*PG);
+  var tb=document.getElementById("tb"),em=document.getElementById("emp");
+  if(!sl.length){tb.innerHTML="";em.style.display="block";}
+  else{
+    em.style.display="none";
+    tb.innerHTML=sl.map(function(r){
+      var i=DATA.indexOf(r),an=r.estado=="ANUL";
+      return "<tr class='"+(sel.has(i)?"sl":"")+(an?" an":"")+"'>"+
+        "<td>"+(an?"":"<input type='checkbox' "+(sel.has(i)?"checked":"")+" onchange='togR("+i+",this)'>")+"</td>"+
+        "<td style='font-weight:600;font-size:12px'>"+(r.boleta||"—")+"</td>"+
+        "<td class='mn'>"+ff(r.fecha)+"</td>"+
+        "<td style='max-width:165px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px' title='"+r.nombre+"'>"+r.nombre+"</td>"+
+        "<td class='mn'>"+r.rut+"</td>"+
+        "<td style='font-family:DM Mono,monospace;font-size:12px;font-weight:600'>"+fmt(r.bruto)+"</td>"+
+        "<td style='font-family:DM Mono,monospace;font-size:12px;color:var(--t3)'>"+fmt(r.liquido)+"</td>"+
+        "<td style='font-size:12px;font-weight:500'>"+(r.empresa||"—")+"</td>"+
+        "<td>"+(an?"<span class='badge ban'>—</span>":epS(i,r.empresaPago))+"</td>"+
+        "<td>"+(an?"<span class='badge ban'>&#10005; Anulada</span>":pgS(i,r.pagado))+"</td>"+
+        "<td>"+(an?"—":nomI(i,r.nomina))+"</td>"+
+        "<td>"+(an?"—":catS(i,r.categoria))+"</td>"+
+        "</tr>";
+    }).join("");
+  }
+  var ca=document.getElementById("cbA");
+  ca.checked=sl.length>0&&sl.every(function(r){return sel.has(DATA.indexOf(r));});
+  ca.indeterminate=!ca.checked&&sl.some(function(r){return sel.has(DATA.indexOf(r));});
+  var ph="<button "+(page<=1?"disabled":"")+" onclick='gp(-1)'>&#8249;</button>";
+  for(var p=Math.max(1,page-1);p<=Math.min(pgs,page+2);p++)
+    ph+="<button class='"+(p==page?"ac":"")+"' onclick='gop("+p+")'>"+p+"</button>";
+  ph+="<button "+(page>=pgs?"disabled":"")+" onclick='gp(1)'>&#8250;</button>";
+  ph+="<span class='inf'>"+tot+" boletas</span>";
+  document.getElementById("pgr").innerHTML=ph;
+  updB();
+}
+
+function upd(i,f,v){DATA[i][f]=v;kpi();save();toast("Guardado ✓");}
+function gp(d){page+=d;render();}function gop(p){page=p;render();}
+function togR(i,cb){if(cb.checked)sel.add(i);else sel.delete(i);updB();}
+function togAll(cb){
+  fData.slice((page-1)*PG,page*PG).forEach(function(r){var i=DATA.indexOf(r);if(cb.checked)sel.add(i);else sel.delete(i);});
+  updB();render();
+}
+function clearSel(){sel.clear();updB();render();}
+function updB(){
+  var b=document.getElementById("bulk"),c=document.getElementById("bct");
+  if(sel.size>0){b.classList.add("on");c.textContent=sel.size+" seleccionada"+(sel.size!=1?"s":"");}
+  else b.classList.remove("on");
+}
+function bMark(f,v){sel.forEach(function(i){DATA[i][f]=v;});kpi();save();toast(sel.size+" boletas actualizadas");clearSel();}
+
+function importF(inp){
+  var file=inp.files[0];if(!file)return;
+  var ext=file.name.split(".").pop().toLowerCase(),reader=new FileReader();
+  if(ext=="csv"){reader.onload=function(e){parseL(e.target.result,file.name);};reader.readAsText(file,"UTF-8");}
+  else{reader.onload=function(e){var wb=XLSX.read(e.target.result,{type:"array"});parseL(XLSX.utils.sheet_to_csv(wb.Sheets[wb.SheetNames[0]]),file.name);};reader.readAsArrayBuffer(file);}
+  inp.value="";
+}
+function parseL(txt,fn){
+  var res=Papa.parse(txt,{header:true,skipEmptyLines:true});
+  DATA=res.data.map(function(r,i){
+    return {id:Date.now()+i,boleta:r["N° Boleta"]||r["boleta"]||"",estado:r["Estado"]||"VIG",fecha:r["Fecha"]||r["fecha"]||"",
+      rut:r["RUT Emisor"]||r["RUT"]||r["rut"]||"",nombre:r["Nombre / Razón Social"]||r["Nombre"]||r["nombre"]||"",
+      bruto:parseFloat((r["Brutos"]||r["bruto"]||"0").toString().replace(/[^0-9.-]/g,""))||0,
+      retencion:parseFloat((r["Retención"]||r["Retencion"]||"0").toString().replace(/[^0-9.-]/g,""))||0,
+      liquido:parseFloat((r["Pagado (Líquido)"]||r["Liquido"]||r["liquido"]||"0").toString().replace(/[^0-9.-]/g,""))||0,
+      empresa:r["Empresa"]||r["empresa"]||"",pagado:(r["¿Pagado?"]||r["pagado"]||"Pendiente").trim(),
+      empresaPago:(r["¿Empresa Pago?"]||"Pendiente").trim(),nomina:r["N° de Nomina"]||"",
+      categoria:r["Categoría"]||r["categoria"]||""};
+  }).filter(function(r){return r.nombre&&r.nombre!="nan"&&r.rut&&r.rut!="nan";});
+  updE();filt();kpi();save();toast(DATA.length+" boletas importadas");
+}
+function expCSV(){
+  var cols=["boleta","estado","fecha","rut","nombre","bruto","retencion","liquido","empresa","pagado","empresaPago","nomina","categoria"];
+  var hdr=["N Boleta","Estado","Fecha","RUT","Nombre","Brutos","Retencion","Liquido","Empresa","Pagado","Empresa Pago","Nomina","Categoria"];
+  var csv=[hdr].concat(fData.map(function(r){return cols.map(function(c){return r[c]||"";}); })).map(function(r){return r.map(function(v){return '"'+String(v).replace(/"/g,'""')+'"';}).join(",");}).join("\n");
+  var a=document.createElement("a");a.href="data:text/csv;charset=utf-8,\uFEFF"+encodeURIComponent(csv);a.download="tasky_boletas.csv";a.click();toast("CSV exportado ✓");
+}
+function showMod(){
+  var e=[];DATA.forEach(function(r){if(r.empresa&&r.estado!="ANUL"&&e.indexOf(r.empresa)<0)e.push(r.empresa);});e.sort();
+  document.getElementById("mE").innerHTML=e.map(function(x){return "<option>"+x+"</option>";}).join("");
+  document.getElementById("mod").classList.add("on");
+}
+function closeMod(){document.getElementById("mod").classList.remove("on");}
+function confMod(){
+  var emp=document.getElementById("mE").value,cnt=0;
+  DATA.forEach(function(r,i){if(r.empresa==emp&&r.estado!="ANUL"){DATA[i].pagado="Si";cnt++;}});
+  closeMod();filt();kpi();save();toast(cnt+" boletas de "+emp+" marcadas ✓");
+}
+var tt;
+function toast(m){var t=document.getElementById("toast");t.textContent=m;t.classList.add("on");clearTimeout(tt);tt=setTimeout(function(){t.classList.remove("on");},2500);}
+</script>
+</body>
+</html>
