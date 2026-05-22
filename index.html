@@ -278,6 +278,7 @@ input[type=checkbox]{accent-color:var(--p);cursor:pointer;width:14px;height:14px
             <select id="fP" onchange="filt()"><option value="">Estado tasker</option><option value="Si">✓ Pagado</option><option value="Pendiente">⏳ Pendiente</option><option value="Anulada">✕ Anulada</option></select>
             <select id="fEP" onchange="filt()"><option value="">Empresa pagó</option><option value="Si">✓ Sí pagó</option><option value="Pendiente">⏳ Pendiente</option></select>
             <select id="fC" onchange="filt()"><option value="">Categoría</option><option value="B2B">B2B</option><option value="B2C">B2C</option><option value="Rendiciones">Rendiciones</option></select>
+            <select id="fMes" onchange="filt()"><option value="">Todos los meses</option></select>
             <div style="margin-left:auto;display:flex;gap:7px">
               <label class="tk" for="fi">↑ Subir CSV/Excel</label>
               <input type="file" id="fi" accept=".csv,.xlsx,.xls" style="display:none" onchange="importF(this)">
@@ -641,7 +642,8 @@ function connectGoogle(){
         gToken=resp.access_token;
         localStorage.setItem("tk_gtoken",gToken);
         setSave("go");
-        saveToSheets();
+        // Reload from Sheets — do NOT save here to avoid overwriting data with empty state
+        loadD();
       }
     });
     client.requestAccessToken();
@@ -843,7 +845,7 @@ function loadD(){
             var nm=localStorage.getItem("tk_n");
             if(nm){try{NOMINAS=JSON.parse(nm);}catch(e){NOMINAS=[];}}
           }
-          setSave("ok");updE();filt();kpi();checkAlerts();syncProveedoresFromData();
+          setSave("ok");updE();updMes();filt();kpi();checkAlerts();syncProveedoresFromData();
         });
       });
     });
@@ -862,7 +864,7 @@ function loadFromLocal(){
   if(p){try{PROVEEDORES=JSON.parse(p);}catch(e){PROVEEDORES=[];}}
   var nm=localStorage.getItem("tk_n");
   if(nm){try{NOMINAS=JSON.parse(nm);}catch(e){NOMINAS=[];}}
-  setSave("ok");updE();filt();kpi();checkAlerts();syncProveedoresFromData();
+  setSave("ok");updE();updMes();filt();kpi();checkAlerts();syncProveedoresFromData();
 }
 
 // ── KPI ──────────────────────────────────────────────────────
@@ -885,11 +887,42 @@ function updE(){
   s.innerHTML='<option value="">Todas las empresas</option>'+e.map(function(x){return "<option>"+x+"</option>";}).join("");
   s.value=c;
 }
+function updMes(){
+  var s=document.getElementById("fMes");
+  if(!s)return;
+  var cur=s.value;
+  var meses={};
+  var MESES_ES=["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+  DATA.forEach(function(r){
+    if(!r.fecha)return;
+    // fecha puede ser DD/MM/YYYY, YYYY-MM-DD, o similar
+    var d=r.fecha.trim();
+    var yr,mo;
+    if(/^\d{4}-\d{2}-\d{2}/.test(d)){yr=d.slice(0,4);mo=parseInt(d.slice(5,7));}
+    else if(/^\d{1,2}\/\d{1,2}\/\d{4}/.test(d)){var p=d.split("/");mo=parseInt(p[1]);yr=p[2].slice(0,4);}
+    else return;
+    var key=yr+"-"+(mo<10?"0":"")+mo;
+    if(!meses[key])meses[key]={key:key,yr:yr,mo:mo};
+  });
+  var keys=Object.keys(meses).sort();
+  s.innerHTML='<option value="">Todos los meses</option>'+keys.map(function(k){
+    var m=meses[k];
+    return '<option value="'+k+'">'+MESES_ES[m.mo-1]+" "+m.yr+"</option>";
+  }).join("");
+  if(cur&&keys.indexOf(cur)>=0)s.value=cur;
+  else if(keys.length){
+    // Auto-select current month if available, else last
+    var now=new Date();
+    var nowKey=now.getFullYear()+"-"+(now.getMonth()+1<10?"0":"")+(now.getMonth()+1);
+    s.value=keys.indexOf(nowKey)>=0?nowKey:keys[keys.length-1];
+  }
+}
 function srt(f){if(sf==f)sdir*=-1;else{sf=f;sdir=1;}filt();}
 function filt(){
   var q=document.getElementById("q").value.toLowerCase();
   var em=document.getElementById("fE").value,pa=document.getElementById("fP").value;
   var ep=document.getElementById("fEP").value,ct=document.getElementById("fC").value;
+  var mes=document.getElementById("fMes")?document.getElementById("fMes").value:"";
   fData=DATA.filter(function(r){
     if(!r.nombre||r.nombre=="nan")return false;
     if(q&&(r.nombre+r.rut+r.empresa+r.boleta).toLowerCase().indexOf(q)<0)return false;
@@ -897,6 +930,15 @@ function filt(){
     if(pa&&(r.pagado||"Pendiente")!=pa)return false;
     if(ep&&(r.empresaPago||"Pendiente")!=ep)return false;
     if(ct&&r.categoria!=ct)return false;
+    if(mes){
+      var d=r.fecha?r.fecha.trim():"";
+      var yr,mo;
+      if(/\d{4}-\d{2}-\d{2}/.test(d)){yr=d.slice(0,4);mo=parseInt(d.slice(5,7));}
+      else if(/\d{1,2}\/\d{1,2}\/\d{4}/.test(d)){var p=d.split("/");mo=parseInt(p[1]);yr=p[2].slice(0,4);}
+      else return false;
+      var key=yr+"-"+(mo<10?"0":"")+mo;
+      if(key!==mes)return false;
+    }
     return true;
   });
   fData.sort(function(a,b){var av=a[sf]||"",bv=b[sf]||"";if(sf=="bruto"||sf=="liquido"){av=+av;bv=+bv;}return av>bv?sdir:av<bv?-sdir:0;});
@@ -1186,7 +1228,7 @@ function addEmpresa(){
   EMPRESAS.push({id:Date.now(),nombre:n.toUpperCase(),categoria:cat,contacto:con});
   document.getElementById("empNombre").value="";
   document.getElementById("empContacto").value="";
-  save();renderEmpresas();updE();filt();toast("Empresa agregada ✓");
+  save();renderEmpresas();updE();updMes();filt();toast("Empresa agregada ✓");
 }
 function delEmpresa(id){
   if(!confirm("¿Eliminar esta empresa del catálogo?"))return;
@@ -1337,7 +1379,7 @@ function mergeSIIData(newRows){
       added++;
     }
   });
-  updE();filt();kpi();checkAlerts();syncProveedoresFromData();save();
+  updE();updMes();filt();kpi();checkAlerts();syncProveedoresFromData();save();
   toast("PDF importado: "+added+" nuevas, "+updated+" actualizadas ✓");
 }
 
@@ -1373,7 +1415,7 @@ function parseL(txt,fn){
   newEmps.forEach(function(n){
     EMPRESAS.push({id:Date.now()+Math.random(),nombre:n,categoria:"",contacto:""});
   });
-  updE();filt();kpi();save();
+  updE();updMes();filt();kpi();save();
   toast(DATA.length+" boletas importadas"+(newEmps.length?" · "+newEmps.length+" empresa"+(newEmps.length!=1?"s":"")+" nueva"+(newEmps.length!=1?"s":"")+" agregada"+(newEmps.length!=1?"s":""):""));
 }
 function expCSV(){
