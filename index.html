@@ -909,13 +909,9 @@ function updMes(){
     var m=meses[k];
     return '<option value="'+k+'">'+MESES_ES[m.mo-1]+" "+m.yr+"</option>";
   }).join("");
+  // Keep current selection if still valid, otherwise reset to "all"
   if(cur&&keys.indexOf(cur)>=0)s.value=cur;
-  else if(keys.length){
-    // Auto-select current month if available, else last
-    var now=new Date();
-    var nowKey=now.getFullYear()+"-"+(now.getMonth()+1<10?"0":"")+(now.getMonth()+1);
-    s.value=keys.indexOf(nowKey)>=0?nowKey:keys[keys.length-1];
-  }
+  else s.value="";
 }
 function srt(f){if(sf==f)sdir*=-1;else{sf=f;sdir=1;}filt();}
 function filt(){
@@ -1861,7 +1857,7 @@ function buildNomina(selBoletas){
     numero:num,
     fecha:new Date().toLocaleDateString("es-CL"),
     estado:"Pendiente",
-    boletas:selBoletas.map(function(b){return b.idx;}),
+    boletas:selBoletas.map(function(b){return b.data.id;}),
     items:selBoletas.map(function(b){
       var p=findProveedor(b.data.rut);
       return {
@@ -1948,10 +1944,11 @@ function pagarNomina(id){
   if(!n)return;
   n.estado="Pagada";
   // Mark all boletas as paid
-  n.boletas.forEach(function(idx){
-    if(DATA[idx]){
-      DATA[idx].pagado="Si";
-      DATA[idx].nomina=n.numero;
+  n.boletas.forEach(function(bid){
+    var b=DATA.find(function(x){return x.id==bid;});
+    if(b){
+      b.pagado="Si";
+      b.nomina=n.numero;
     }
   });
   kpi();checkAlerts();save();filt();renderNominas();
