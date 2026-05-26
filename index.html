@@ -2344,9 +2344,10 @@ function togAllA(cb){
 function aprobarSel(){
   if(!sel||sel.size===0){toast("Selecciona boletas primero");return;}
   var count=0;
-  var selArr=Array.from(sel).map(String);
-  DATA.forEach(function(r){
-    if(selArr.indexOf(String(r.id))>=0){
+  // sel stores DATA indices, not IDs
+  sel.forEach(function(i){
+    var r=DATA[i];
+    if(r&&r.pagado!=="Anulada"){
       r.aprobada=true;
       r.fechaAprobacion=new Date().toLocaleDateString("es-CL");
       count++;
