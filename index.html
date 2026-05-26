@@ -88,53 +88,73 @@ body{font-family:'Poppins',sans-serif;background:var(--bg);color:var(--t);font-s
 
 /* ── KPIs ── */
 .kg{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
-.kc{background:var(--s);border:1px solid var(--b);border-radius:14px;padding:18px 20px;box-shadow:var(--shadow);position:relative;overflow:hidden}
-.kc::after{content:'';position:absolute;top:0;right:0;width:4px;height:100%;background:var(--ka)}
-.kl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.7px;color:var(--t3);margin-bottom:6px}
-.kv{font-size:22px;font-weight:700;color:var(--kc);font-family:'DM Mono',monospace;letter-spacing:-1px}
+.kc{background:var(--s);border:1px solid var(--b);border-radius:16px;padding:20px 22px;box-shadow:var(--shadow);position:relative;overflow:hidden;transition:box-shadow .2s,transform .2s}
+.kc:hover{box-shadow:var(--shadow-md);transform:translateY(-1px)}
+.kc::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--ka);border-radius:16px 16px 0 0}
+.kc-icon{width:34px;height:34px;border-radius:10px;background:var(--ka);display:flex;align-items:center;justify-content:center;margin-bottom:14px;flex-shrink:0}
+.kc-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px}
+.kl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--t3)}
+.kv{font-size:26px;font-weight:800;color:var(--t);font-family:'DM Mono',monospace;letter-spacing:-1.5px;line-height:1}
+.kv-sub{font-size:11px;color:var(--t3);margin-top:5px;font-weight:400}
 
 /* ── ALERT BANNER ── */
-.alert-banner{display:none;background:var(--rb);border:1.5px solid #FCCACA;border-radius:12px;padding:14px 18px;margin-bottom:20px;gap:12px;align-items:flex-start}
+.alert-banner{display:none;background:var(--rb);border:1px solid #FCCACA;border-radius:12px;padding:12px 16px;margin-bottom:18px;gap:10px;align-items:center}
 .alert-banner.on{display:flex}
-.alert-icon{font-size:18px;flex-shrink:0;margin-top:1px}
-.alert-body{flex:1}
-.alert-title{font-size:13px;font-weight:600;color:var(--rt);margin-bottom:6px}
-.alert-list{display:flex;flex-direction:column;gap:4px}
-.alert-item{font-size:12px;color:#7B1A1A;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.alert-close{background:none;border:none;cursor:pointer;color:var(--rt);font-size:18px;padding:0;flex-shrink:0;opacity:.7}
+.alert-icon-wrap{width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,#EF4444,#FB7185);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.alert-body{flex:1;min-width:0}
+.alert-title{font-size:12px;font-weight:700;color:var(--rt);margin-bottom:3px}
+.alert-list{display:flex;flex-direction:column;gap:2px;max-height:80px;overflow:hidden;transition:max-height .3s}
+.alert-list.expanded{max-height:400px}
+.alert-item{font-size:11px;color:#7B1A1A;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.alert-toggle{background:none;border:none;cursor:pointer;color:var(--rt);font-size:11px;font-weight:600;padding:2px 0;font-family:'Poppins',sans-serif;text-decoration:underline;margin-top:2px}
+.alert-close{background:none;border:none;cursor:pointer;color:var(--rt);font-size:16px;padding:4px;flex-shrink:0;opacity:.6;transition:opacity .15s;line-height:1}
 .alert-close:hover{opacity:1}
 
 /* ── TOOLBAR ── */
-.toolbar{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:14px;align-items:center}
-.toolbar input,.toolbar select{height:34px;padding:0 11px;border:1px solid var(--b);border-radius:8px;background:var(--s);color:var(--t);font-family:'Poppins',sans-serif;font-size:12px;outline:none;transition:border .15s;box-shadow:var(--shadow)}
-.toolbar input:focus,.toolbar select:focus{border-color:var(--p)}
-.toolbar input{min-width:180px;flex:1;max-width:220px}
-.toolbar select{min-width:128px}
-.tk{display:inline-flex;align-items:center;gap:5px;height:34px;padding:0 13px;border:1px solid var(--b2);border-radius:8px;background:var(--s);color:var(--t2);font-family:'Poppins',sans-serif;font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap;transition:all .15s;box-shadow:var(--shadow)}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;align-items:center;background:var(--s);border:1px solid var(--b);border-radius:12px;padding:10px 14px;box-shadow:var(--shadow)}
+.toolbar input,.toolbar select{height:34px;padding:0 12px;border:1.5px solid var(--b);border-radius:8px;background:var(--bg);color:var(--t);font-family:'Poppins',sans-serif;font-size:12px;outline:none;transition:border .15s}
+.toolbar input:focus,.toolbar select:focus{border-color:var(--p);background:var(--s);box-shadow:0 0 0 3px rgba(107,92,231,.08)}
+.toolbar input{min-width:200px;flex:1;max-width:240px}
+.toolbar select{min-width:130px}
+.toolbar-sep{width:1px;height:20px;background:var(--b);flex-shrink:0}
+.tk{display:inline-flex;align-items:center;gap:5px;height:34px;padding:0 14px;border:1.5px solid var(--b);border-radius:8px;background:var(--s);color:var(--t2);font-family:'Poppins',sans-serif;font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap;transition:all .15s}
 .tk:hover{border-color:var(--p);color:var(--p);background:var(--pl)}
-.tk.g{color:var(--gt);border-color:#B7E4C7}.tk.g:hover{background:var(--gb)}
+.tk.g{color:var(--gt);border-color:#A7F3D0;background:#ECFDF5}.tk.g:hover{background:#D1FAE5;border-color:#6EE7B7}
+.tk.pri{background:linear-gradient(135deg,var(--p),var(--pd));color:#fff;border-color:transparent}.tk.pri:hover{opacity:.9}
 
 /* ── BULK BAR ── */
-.bulk{display:none;align-items:center;gap:8px;padding:10px 16px;background:var(--pl);border:1.5px solid var(--pm);border-radius:10px;margin-bottom:12px;font-size:12px;color:var(--p);font-weight:600;flex-wrap:wrap}
+.bulk{display:none;align-items:center;gap:8px;padding:10px 16px;background:rgba(255,255,255,0.95);border:1px solid var(--b);border-radius:12px;margin-bottom:14px;font-size:12px;color:var(--p);font-weight:600;flex-wrap:wrap;box-shadow:0 8px 32px rgba(107,92,231,.12);backdrop-filter:blur(12px);position:sticky;bottom:16px;z-index:20;animation:slideUp .25s cubic-bezier(.34,1.56,.64,1)}
+@keyframes slideUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 .bulk.on{display:flex}
-.bb{padding:5px 12px;border-radius:7px;border:1.5px solid var(--p);background:var(--p);color:#fff;font-family:'Poppins',sans-serif;font-size:11px;font-weight:500;cursor:pointer;transition:all .15s}
-.bb:hover{background:var(--pd)}
-.bb.o{background:transparent;color:var(--p)}.bb.o:hover{background:var(--p);color:#fff}
-.bb.r{background:#fff;color:var(--rt);border-color:var(--rt)}.bb.r:hover{background:var(--rt);color:#fff}
+.bulk-count{background:linear-gradient(135deg,var(--p),var(--pd));color:#fff;border-radius:7px;padding:3px 10px;font-size:12px;font-weight:700;flex-shrink:0}
+.bulk-sep{width:1px;height:18px;background:var(--b);flex-shrink:0}
+.bb{padding:6px 14px;border-radius:8px;border:1.5px solid var(--p);background:var(--p);color:#fff;font-family:'Poppins',sans-serif;font-size:11px;font-weight:600;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:5px}
+.bb:hover{background:var(--pd);transform:translateY(-1px)}
+.bb.o{background:transparent;color:var(--p)}.bb.o:hover{background:var(--pl)}
+.bb.r{background:#fff;color:var(--rt);border-color:#FECACA}.bb.r:hover{background:var(--rb)}
+.bb.approve{background:linear-gradient(135deg,#1D4ED8,#2563EB);border-color:transparent}.bb.approve:hover{opacity:.9}
 
 /* ── TABLE ── */
-.tc{background:var(--s);border:1px solid var(--b);border-radius:14px;overflow:hidden;box-shadow:var(--shadow)}
+.tc{background:var(--s);border:1px solid var(--b);border-radius:16px;overflow:hidden;box-shadow:var(--shadow)}
 .tc-scroll{overflow-x:auto}
 table{width:100%;border-collapse:collapse;min-width:1000px}
-th{padding:10px 12px;text-align:left;font-size:10px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;border-bottom:1.5px solid var(--b);background:var(--bg);white-space:nowrap;cursor:pointer;user-select:none;transition:color .15s}
+th{padding:11px 14px;text-align:left;font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.7px;border-bottom:1px solid var(--b);background:var(--bg);white-space:nowrap;cursor:pointer;user-select:none;transition:color .15s}
 th:hover{color:var(--p)}
-td{padding:9px 12px;border-bottom:1px solid var(--b);vertical-align:middle}
+td{padding:12px 14px;border-bottom:1px solid var(--b);vertical-align:middle;font-size:12.5px}
 tr:last-child td{border-bottom:none}
-tr:hover td{background:#F5F3FF}
+tr:hover td{background:#F8F7FF}
 tr.sl td{background:#EEEDFE}
 tr.an{opacity:.4}
-tr.overdue td{background:#FFF5F5}
+tr.overdue td{background:#FFF8F8}
 tr.overdue td:first-child{box-shadow:inset 3px 0 0 var(--rt)}
+.tasker-cell{display:flex;align-items:center;gap:9px}
+.tasker-avatar{width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,var(--p),var(--pd));display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0;letter-spacing:-.3px}
+.tasker-name{font-weight:600;color:var(--t);font-size:12.5px}
+.tasker-rut{font-size:10px;color:var(--t3);font-family:'DM Mono',monospace;margin-top:1px}
+.amount-cell{font-family:'DM Mono',monospace;font-weight:700;font-size:13px;letter-spacing:-.5px}
+.amount-bruto{color:var(--t2)}
+.amount-liquido{color:#059669}
+.boleta-num{font-family:'DM Mono',monospace;font-weight:600;font-size:13px;color:var(--t)}
 
 /* ── BADGES & INLINE INPUTS ── */
 .badge{display:inline-flex;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap}
@@ -297,19 +317,32 @@ input[type=checkbox]{accent-color:var(--p);cursor:pointer;width:14px;height:14px
         <!-- TAB BOLETAS -->
         <div id="tabBoletas">
           <div class="alert-banner" id="alertBanner">
-            <div class="alert-icon" style="font-size:18px;color:var(--rt)">!</div>
+            <div class="alert-icon-wrap"><svg width="14" height="14" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0zm1.71 5.14v4m0 4h.01"/></svg></div>
             <div class="alert-body">
               <div class="alert-title" id="alertTitle">Boletas con pago atrasado</div>
               <div class="alert-list" id="alertList"></div>
+              <button class="alert-toggle" id="alertToggle" onclick="toggleAlertList()" style="display:none">Ver más</button>
             </div>
             <button class="alert-close" onclick="document.getElementById('alertBanner').classList.remove('on');document.getElementById('navBadgeAlert').style.display='none'">✕</button>
           </div>
 
           <div class="kg">
-            <div class="kc" style="--ka:#E07800;--kc:#B85C00"><div class="kl">$ por pagar</div><div class="kv" id="kP">—</div></div>
-            <div class="kc" style="--ka:#22C55E;--kc:#0F6E56"><div class="kl">Total pagado</div><div class="kv" id="kV">—</div></div>
-            <div class="kc" style="--ka:#22C55E;--kc:#186B3A"><div class="kl">Boletas pagadas</div><div class="kv" id="kPg">—</div></div>
-            <div class="kc" style="--ka:#E07800;--kc:#A85E00"><div class="kl">Pendientes</div><div class="kv" id="kPd">—</div></div>
+            <div class="kc" style="--ka:linear-gradient(135deg,#F59E0B,#F97316)">
+              <div class="kc-top"><span class="kl">$ Por Pagar</span><div class="kc-icon"><svg width="14" height="14" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div></div>
+              <div class="kv" id="kP">—</div><div class="kv-sub">Monto por transferir</div>
+            </div>
+            <div class="kc" style="--ka:linear-gradient(135deg,#10B981,#059669)">
+              <div class="kc-top"><span class="kl">Total Pagado</span><div class="kc-icon"><svg width="14" height="14" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></div></div>
+              <div class="kv" id="kV">—</div><div class="kv-sub">Acumulado pagado</div>
+            </div>
+            <div class="kc" style="--ka:linear-gradient(135deg,#6B5CE7,#5548C8)">
+              <div class="kc-top"><span class="kl">Boletas Pagadas</span><div class="kc-icon"><svg width="14" height="14" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M9 7h6M9 11h6M9 15h4"/></svg></div></div>
+              <div class="kv" id="kPg">—</div><div class="kv-sub">Taskers pagados</div>
+            </div>
+            <div class="kc" style="--ka:linear-gradient(135deg,#3B6FFF,#6366F1)">
+              <div class="kc-top"><span class="kl">Pendientes</span><div class="kc-icon"><svg width="14" height="14" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg></div></div>
+              <div class="kv" id="kPd">—</div><div class="kv-sub">Por revisar</div>
+            </div>
           </div>
 
           <div class="toolbar">
@@ -330,12 +363,14 @@ input[type=checkbox]{accent-color:var(--p);cursor:pointer;width:14px;height:14px
           </div>
 
           <div class="bulk" id="bulk">
-            <span id="bct">0 seleccionadas</span>
-            <button class="bb" style="background:#1D4ED8;border-color:#1D4ED8" onclick="aprobarSel()">✓ Aprobar seleccionadas</button>
+            <span class="bulk-count" id="bct">0</span>
+            <span style="font-size:12px;color:var(--t2);font-weight:500">seleccionadas</span>
+            <div class="bulk-sep"></div>
+            <button class="bb approve" onclick="aprobarSel()">✓ Aprobar</button>
             <button class="bb" onclick="bMark('pagado','Si')">✓ Tasker pagado</button>
-            <button class="bb" onclick="bMark('empresaPago','Si')">✓ Empresa pagó</button>
+            <button class="bb" style="background:linear-gradient(135deg,#10B981,#059669);border-color:transparent" onclick="bMark('empresaPago','Si')">✓ Empresa pagó</button>
             <button class="bb r" onclick="bMark('pagado','Anulada')">✕ Anular</button>
-            <button class="bb o" onclick="clearSel()">Cancelar</button>
+            <button class="bb o" onclick="clearSel()" style="margin-left:auto">Cancelar</button>
           </div>
 
           <div class="tc">
@@ -1261,6 +1296,13 @@ function parseBoleta(s){
   if(p.length===3)return new Date(+p[0],+p[1]-1,+p[2]);
   return null;
 }
+function toggleAlertList(){
+  var list=document.getElementById("alertList");
+  var btn=document.getElementById("alertToggle");
+  if(!list||!btn)return;
+  var exp=list.classList.toggle("expanded");
+  btn.textContent=exp?"Ver menos":"Ver más";
+}
 function checkAlerts(){
   var overdue=DATA.filter(function(r){return isOverdue(r);});
   var banner=document.getElementById("alertBanner");
@@ -1317,19 +1359,26 @@ function render(){
     em.style.display="none";
     tb.innerHTML=sl.map(function(r){
       var i=DATA.indexOf(r),an=r.estado=="ANUL";
+      var ini=r.nombre?r.nombre.split(" ").slice(0,2).map(function(w){return w[0]||"";}).join("").toUpperCase().slice(0,2):"?";
+      var avatarBg=an?"#C4BEFF":"linear-gradient(135deg,#6B5CE7,#5548C8)";
       return "<tr class='"+(sel.has(i)?"sl":"")+(an?" an":isOverdue(r)?" overdue":"")+"'>"+
         "<td>"+(an?"":"<input type='checkbox' "+(sel.has(i)?"checked":"")+" onchange='togR("+i+",this)'>")+"</td>"+
-        "<td style='font-weight:600;font-size:12px'>"+(r.boleta||"—")+"</td>"+
-        "<td class='mn'>"+ff(r.fecha)+"</td>"+
-        "<td style='max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px' title='"+r.nombre+"'>"+r.nombre+"</td>"+
-        "<td class='mn'>"+r.rut+"</td>"+
-        "<td style='font-family:DM Mono,monospace;font-size:12px;font-weight:600'>"+fmt(r.bruto)+"</td>"+
-        "<td style='font-family:DM Mono,monospace;font-size:12px;color:var(--t3)'>"+fmt(r.liquido)+"</td>"+
+        "<td class='boleta-num'>"+(r.boleta||"—")+"</td>"+
+        "<td class='mn' style='color:var(--t3)'>"+ff(r.fecha)+"</td>"+
+        "<td style='min-width:180px'>"+
+          "<div class='tasker-cell'>"+
+            "<div class='tasker-avatar' style='background:"+avatarBg+"'>"+ini+"</div>"+
+            "<div><div class='tasker-name'>"+r.nombre+"</div>"+
+            "<div class='tasker-rut'>"+r.rut+"</div></div>"+
+          "</div>"+
+        "</td>"+
+        "<td class='amount-cell amount-bruto'>"+fmt(r.bruto)+"</td>"+
+        "<td class='amount-cell amount-liquido'>"+fmt(r.liquido)+"</td>"+
         "<td>"+empS(i,r.empresa)+"</td>"+
         "<td>"+(an?"—":actI(i,r.activacion))+"</td>"+
         "<td>"+(an?"—":fechaPagoI(i,r.fechaPago,r.pagado))+"</td>"+
         "<td>"+(an?"<span class='badge ban'>—</span>":epS(i,r.empresaPago))+"</td>"+
-        "<td>"+(an?"<span class='badge ban'>&#10005; Anulada</span>":pgS(i,r.pagado))+"</td>"+
+        "<td>"+(an?"<span class='badge ban'>✕ Anulada</span>":pgS(i,r.pagado))+"</td>"+
         "<td>"+(an?"—":nomI(i,r.nomina))+"</td>"+
         "<td>"+(an?"—":catS(i,r.categoria))+"</td>"+
         "</tr>";
@@ -1359,7 +1408,7 @@ function togAll(cb){
 function clearSel(){sel.clear();updB();render();}
 function updB(){
   var b=document.getElementById("bulk"),c=document.getElementById("bct");
-  if(sel.size>0){b.classList.add("on");c.textContent=sel.size+" seleccionada"+(sel.size!=1?"s":"");}
+  if(sel.size>0){b.classList.add("on");c.textContent=sel.size;}
   else b.classList.remove("on");
 }
 function bMark(f,v){
