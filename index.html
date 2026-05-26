@@ -2380,12 +2380,21 @@ function aprobarSel(){
   toast(count+" boleta"+(count!==1?"s":"")+" aprobada"+(count!==1?"s":"")+" ✓");
 }
 function desaprobarSel(){
-  selA.forEach(function(id){
-    var r=DATA.find(function(x){return (x.id||x.boleta+x.rut)==id;});
-    if(r){r.aprobada=false;delete r.fechaAprobacion;}
+  if(selA.size===0){toast("Selecciona boletas primero");return;}
+  var count=0;
+  var selArr=Array.from(selA).map(String);
+  DATA.forEach(function(r){
+    var rid=String(r.id||r.boleta+r.rut);
+    if(selArr.indexOf(rid)>=0){
+      r.aprobada=false;
+      delete r.fechaAprobacion;
+      count++;
+    }
   });
-  clearSelA();save();updAproE();updAproMes();filtA();kpiApro();
-  toast("Boletas devueltas a Pendientes");
+  clearSelA();save();
+  filt();kpi();
+  updAproE();updAproMes();filtA();kpiApro();updNavBadges();
+  toast(count+" boleta"+(count!==1?"s":"")+" devuelta"+(count!==1?"s":"")+" a Pendientes");
 }
 function abrirModProvApro(rut, nombre){
   // Find or create proveedor entry
