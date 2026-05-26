@@ -263,6 +263,10 @@ input[type=checkbox]{accent-color:var(--p);cursor:pointer;width:14px;height:14px
         </div>
 
         <!-- RESTO -->
+        <button class="nav-item" id="nav-facturacion" onclick="showTab('facturacion',this)">
+          <span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></span> Facturación
+          <span class="nav-badge" id="navBadgeFact" style="display:none">0</span>
+        </button>
         <button class="nav-item" id="nav-empresas" onclick="showTab('empresas',this)">
           <span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg></span> Empresas
         </button>
@@ -470,6 +474,99 @@ input[type=checkbox]{accent-color:var(--p);cursor:pointer;width:14px;height:14px
             </div>
           </div>
           <div class="pgr" id="pgrT"></div>
+        </div>
+
+        <!-- TAB FACTURACIÓN -->
+        <div id="tabFacturacion" style="display:none">
+
+          <!-- KPIs -->
+          <div class="kg" style="grid-template-columns:repeat(3,1fr)">
+            <div class="kc" style="--ka:#6B5CE7;--kc:#4E4A72"><div class="kl">Facturas</div><div class="kv" id="kFact">—</div></div>
+            <div class="kc" style="--ka:#186B3A;--kc:#186B3A"><div class="kl">Facturado</div><div class="kv" id="kFactMonto">—</div></div>
+            <div class="kc" style="--ka:#E07800;--kc:#A85E00"><div class="kl">Margen promedio</div><div class="kv" id="kFactMargen">—</div></div>
+          </div>
+
+          <!-- Actions bar -->
+          <div style="display:flex;gap:8px;margin-bottom:14px;align-items:center">
+            <label class="tk" style="cursor:pointer;gap:6px">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+              Subir Factura PDF
+              <input type="file" accept=".pdf" style="display:none" onchange="importFacturaPDF(this)">
+            </label>
+            <button class="tk" onclick="showModalFactura()">+ Nueva factura manual</button>
+          </div>
+
+          <!-- Facturas list -->
+          <div id="facturasList"></div>
+          <div id="facturasEmpty" style="display:none;text-align:center;padding:60px;color:var(--t3)">
+            <div style="font-size:40px;margin-bottom:12px">🧾</div>
+            <div style="font-size:15px;font-weight:500;color:var(--t2)">Sin facturas registradas</div>
+            <div style="font-size:13px;margin-top:6px">Sube un PDF de NUBOX o agrega una manualmente</div>
+          </div>
+        </div>
+
+        <!-- MODAL FACTURA MANUAL -->
+        <div id="modFactura" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:3000;display:none;align-items:center;justify-content:center">
+          <div style="background:#fff;border-radius:16px;padding:28px;width:480px;max-width:92vw;box-shadow:0 20px 60px rgba(0,0,0,0.15)" onclick="event.stopPropagation()">
+            <div style="font-size:16px;font-weight:700;color:var(--t);margin-bottom:20px">Nueva Factura</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
+              <div>
+                <label style="font-size:11px;font-weight:600;color:var(--t2);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px">N° Factura</label>
+                <input id="mfNum" placeholder="232" style="width:100%;padding:9px 12px;border:1.5px solid var(--b);border-radius:8px;font-family:Poppins,sans-serif;font-size:13px;outline:none;box-sizing:border-box">
+              </div>
+              <div>
+                <label style="font-size:11px;font-weight:600;color:var(--t2);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px">Fecha Emisión</label>
+                <input id="mfFecha" type="date" style="width:100%;padding:9px 12px;border:1.5px solid var(--b);border-radius:8px;font-family:Poppins,sans-serif;font-size:13px;outline:none;box-sizing:border-box">
+              </div>
+            </div>
+            <div style="margin-bottom:14px">
+              <label style="font-size:11px;font-weight:600;color:var(--t2);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px">Cliente</label>
+              <input id="mfCliente" placeholder="Nombre empresa cliente" style="width:100%;padding:9px 12px;border:1.5px solid var(--b);border-radius:8px;font-family:Poppins,sans-serif;font-size:13px;outline:none;box-sizing:border-box">
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
+              <div>
+                <label style="font-size:11px;font-weight:600;color:var(--t2);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px">RUT Cliente</label>
+                <input id="mfRut" placeholder="78.237.989-5" style="width:100%;padding:9px 12px;border:1.5px solid var(--b);border-radius:8px;font-family:Poppins,sans-serif;font-size:13px;outline:none;box-sizing:border-box;font-family:DM Mono,monospace">
+              </div>
+              <div>
+                <label style="font-size:11px;font-weight:600;color:var(--t2);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px">Monto Total</label>
+                <input id="mfMonto" type="number" placeholder="30000" style="width:100%;padding:9px 12px;border:1.5px solid var(--b);border-radius:8px;font-family:Poppins,sans-serif;font-size:13px;outline:none;box-sizing:border-box">
+              </div>
+            </div>
+            <div style="margin-bottom:14px">
+              <label style="font-size:11px;font-weight:600;color:var(--t2);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px">Descripción del servicio</label>
+              <input id="mfDesc" placeholder="Ej: Promotora para Videos" style="width:100%;padding:9px 12px;border:1.5px solid var(--b);border-radius:8px;font-family:Poppins,sans-serif;font-size:13px;outline:none;box-sizing:border-box">
+            </div>
+            <div style="margin-bottom:22px">
+              <label style="font-size:11px;font-weight:600;color:var(--t2);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px">Estado</label>
+              <select id="mfEstado" style="width:100%;padding:9px 12px;border:1.5px solid var(--b);border-radius:8px;font-family:Poppins,sans-serif;font-size:13px;outline:none;box-sizing:border-box">
+                <option value="Pendiente cobro">Pendiente cobro</option>
+                <option value="Cobrada">Cobrada</option>
+              </select>
+            </div>
+            <div style="display:flex;gap:8px">
+              <button onclick="guardarFactura()" style="flex:1;padding:11px 0;border-radius:9px;background:var(--p);color:#fff;font-weight:700;font-size:13px;border:none;cursor:pointer;font-family:Poppins,sans-serif">Guardar Factura</button>
+              <button onclick="closeModalFactura()" style="padding:11px 18px;border-radius:9px;background:var(--bg);border:1.5px solid var(--b);color:var(--t2);font-weight:600;font-size:13px;cursor:pointer;font-family:Poppins,sans-serif">Cancelar</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- MODAL VINCULAR BOLETAS -->
+        <div id="modVincular" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:3000;align-items:center;justify-content:center">
+          <div style="background:#fff;border-radius:16px;padding:28px;width:600px;max-width:92vw;max-height:82vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,0.15)" onclick="event.stopPropagation()">
+            <div style="font-size:16px;font-weight:700;color:var(--t);margin-bottom:4px" id="modVincularTitle">Vincular boletas</div>
+            <div style="font-size:12px;color:var(--t3);margin-bottom:16px" id="modVincularSub"></div>
+            <div style="flex:1;overflow-y:auto;border:1px solid var(--b);border-radius:10px;margin-bottom:16px">
+              <div id="vincularList" style="display:flex;flex-direction:column;gap:0"></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div style="font-size:12px;color:var(--t2)" id="vincularTotal">Total seleccionado: $0</div>
+              <div style="display:flex;gap:8px">
+                <button onclick="confirmarVinculacion()" style="padding:10px 20px;border-radius:9px;background:var(--p);color:#fff;font-weight:700;font-size:13px;border:none;cursor:pointer;font-family:Poppins,sans-serif">Confirmar</button>
+                <button onclick="closeModalVincular()" style="padding:10px 16px;border-radius:9px;background:var(--bg);border:1.5px solid var(--b);color:var(--t2);font-weight:600;font-size:13px;cursor:pointer;font-family:Poppins,sans-serif">Cancelar</button>
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- TAB EMPRESAS -->
@@ -733,6 +830,11 @@ var HEADERS_BOLETAS=["id","boleta","estado","fecha","rut","nombre","bruto","rete
 var HEADERS_EMPRESAS=["id","nombre","categoria","contacto"];
 var HEADERS_PROVEEDORES=["rut","nombre","codBanco","banco","cuenta","tipo","email"];
 var HEADERS_NOMINAS=["id","numero","fecha","estado","total","boletas","items"];
+var HEADERS_FACTURAS=["id","numero","cliente","rutCliente","fecha","monto","neto","iva","descripcion","estado","boletasVinculadas"];
+var SHEET_FACTURAS="Facturas";
+var FACTURAS=[];
+var vincularFacturaId=null;
+var vincularSelBoletas=new Set();
 var SHEET_PROVEEDORES="Proveedores";
 var SHEET_NOMINAS="Nominas";
 
@@ -748,9 +850,9 @@ function showSubTab(name,btn){
   btn.classList.add("on");
 }
 
-var TAB_TITLES={"boletas":"Pendientes","aprobadas":"Aprobadas","todas":"Todas las Boletas","empresas":"Empresas","metricas":"Métricas","proveedores":"Proveedores","nominas":"Nóminas"};
+var TAB_TITLES={"boletas":"Pendientes","aprobadas":"Aprobadas","todas":"Todas las Boletas","facturacion":"Facturación","empresas":"Empresas","metricas":"Métricas","proveedores":"Proveedores","nominas":"Nóminas"};
 function showTab(name,btn){
-  ["tabBoletas","tabAprobadas","tabTodas","tabEmpresas","tabMetricas","tabProveedores","tabNominas"].forEach(function(id){
+  ["tabBoletas","tabAprobadas","tabTodas","tabFacturacion","tabEmpresas","tabMetricas","tabProveedores","tabNominas"].forEach(function(id){
     document.getElementById(id).style.display="none";
   });
   document.getElementById("tab"+name.charAt(0).toUpperCase()+name.slice(1)).style.display="block";
@@ -768,6 +870,7 @@ function showTab(name,btn){
   if(name==="nominas")renderNominas();
   if(name==="aprobadas"){updAproE();updAproMes();filtA();kpiApro();}
   if(name==="todas"){updTodasE();updTodasMes();filtT();kpiTodas();}
+  if(name==="facturacion")renderFacturacion();
 }
 function toggleDocGroup(){
   var list=document.getElementById("docSubList");
@@ -941,6 +1044,21 @@ function saveProveedoresSheet(){
   });
 }
 
+function saveFacturasSheet(){
+  ensureHeaders(SHEET_FACTURAS,HEADERS_FACTURAS,function(){
+    var rows=FACTURAS.map(function(f){
+      return HEADERS_FACTURAS.map(function(h){
+        if(h==="boletasVinculadas")return JSON.stringify(f.boletasVinculadas||[]);
+        return f[h]!==undefined?f[h]:"";
+      });
+    });
+    sheetsReq("DELETE","/values/"+encodeURIComponent(SHEET_FACTURAS+"!A2:Z")+":clear",{},function(){
+      if(!rows.length){setSave("ok");return;}
+      sheetsReq("PUT","/values/"+encodeURIComponent(SHEET_FACTURAS+"!A2")+"?valueInputOption=RAW",
+        {values:rows},function(){setSave("ok");});
+    });
+  });
+}
 function saveNominasSheet(){
   ensureHeaders(SHEET_NOMINAS,HEADERS_NOMINAS,function(){
     var rows=NOMINAS.map(function(n){
@@ -948,9 +1066,9 @@ function saveNominasSheet(){
               JSON.stringify(n.boletas),JSON.stringify(n.items)];
     });
     sheetsReq("DELETE","/values/"+encodeURIComponent(SHEET_NOMINAS+"!A2:Z")+":clear",{},function(){
-      if(!rows.length){setSave("ok");return;}
+      if(!rows.length){saveFacturasSheet();return;}
       sheetsReq("PUT","/values/"+encodeURIComponent(SHEET_NOMINAS+"!A2")+"?valueInputOption=RAW",
-        {values:rows},function(){setSave("ok");});
+        {values:rows},function(){saveFacturasSheet();});
     });
   });
 }
@@ -1002,6 +1120,22 @@ function loadD(){
           var p=localStorage.getItem("tk_p");
           if(p){try{PROVEEDORES=JSON.parse(p);}catch(e){PROVEEDORES=[];}}
         }
+        // Load Facturas from Sheets
+        sheetsReq("GET","/values/"+SHEET_FACTURAS+"!A1:Z",null,function(rf){
+          if(rf&&rf.values&&rf.values.length>1){
+            var hf=rf.values[0];
+            FACTURAS=rf.values.slice(1).map(function(row){
+              var obj={};
+              hf.forEach(function(h,j){obj[h]=row[j]||"";});
+              obj.monto=parseFloat(obj.monto)||0;
+              obj.neto=parseFloat(obj.neto)||0;
+              obj.iva=parseFloat(obj.iva)||0;
+              try{obj.boletasVinculadas=JSON.parse(obj.boletasVinculadas||"[]");}catch(e){obj.boletasVinculadas=[];}
+              if(!obj.id)obj.id="F"+Date.now();
+              return obj;
+            }).filter(function(f){return f.numero;});
+          } else {FACTURAS=[];}
+        });
         // Load Nominas from Sheets
         sheetsReq("GET","/values/"+SHEET_NOMINAS+"!A1:Z",null,function(rn){
           if(rn&&rn.values&&rn.values.length>1){
@@ -2607,6 +2741,313 @@ function buildPgr(pg,tp,pgVar,filtFn){
   }
   btns+='<button onclick="'+pgVar+'=Math.min('+tp+','+pgVar+'+1);'+filtFn+'()" '+(pg===tp?'disabled':'')+'>›</button>';
   return btns;
+}
+
+
+// ── FACTURACIÓN ───────────────────────────────────────────────
+
+function renderFacturacion(){
+  var list=document.getElementById("facturasList");
+  var empty=document.getElementById("facturasEmpty");
+  if(!list)return;
+  var badge=document.getElementById("navBadgeFact");
+  if(badge){badge.textContent=FACTURAS.length;badge.style.display=FACTURAS.length>0?"inline":"none";}
+  // KPIs
+  var totalMonto=FACTURAS.reduce(function(s,f){return s+f.monto;},0);
+  var margenes=FACTURAS.map(function(f){
+    var bolSum=getBolsVinculadas(f).reduce(function(s,b){return s+(b.liquido||0);},0);
+    return f.monto>0?((f.monto-bolSum)/f.monto*100):0;
+  });
+  var avgMargen=margenes.length?margenes.reduce(function(s,m){return s+m;},0)/margenes.length:0;
+  var el=document.getElementById("kFact");if(el)el.textContent=FACTURAS.length;
+  el=document.getElementById("kFactMonto");if(el)el.textContent=fmt(totalMonto);
+  el=document.getElementById("kFactMargen");if(el)el.textContent=avgMargen.toFixed(1)+"%";
+
+  if(!FACTURAS.length){
+    list.innerHTML="";empty.style.display="block";return;
+  }
+  empty.style.display="none";
+  list.innerHTML=FACTURAS.map(function(f){
+    var bols=getBolsVinculadas(f);
+    var bolSum=bols.reduce(function(s,b){return s+(b.liquido||0);},0);
+    var margen=f.monto>0?((f.monto-bolSum)/f.monto*100):0;
+    var margenColor=margen>30?"#186B3A":margen>10?"#A85E00":"#B91C1C";
+    var esPagada=f.estado==="Cobrada";
+    return '<div style="background:#fff;border:1px solid var(--b);border-radius:14px;overflow:hidden;margin-bottom:12px;box-shadow:var(--shadow)">'+
+      // Header
+      '<div style="padding:16px 20px;display:flex;align-items:center;gap:14px;border-bottom:1px solid var(--b)">'+
+        '<div style="width:42px;height:42px;border-radius:11px;background:linear-gradient(135deg,var(--p),var(--pd));display:flex;align-items:center;justify-content:center;flex-shrink:0">'+
+          '<svg width="18" height="18" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z"/><polyline points="14 2 14 8 20 8"/></svg>'+
+        '</div>'+
+        '<div style="flex:1">'+
+          '<div style="font-size:14px;font-weight:700;color:var(--t)">Factura N° '+f.numero+'</div>'+
+          '<div style="font-size:12px;color:var(--t3);margin-top:2px">'+f.cliente+' · '+f.fecha+'</div>'+
+        '</div>'+
+        '<div style="text-align:right;margin-right:12px">'+
+          '<div style="font-size:20px;font-weight:800;color:var(--t);font-family:DM Mono,monospace;letter-spacing:-1px">'+fmt(f.monto)+'</div>'+
+          '<span style="font-size:11px;font-weight:600;padding:2px 9px;border-radius:20px;background:'+(esPagada?"var(--gb)":"var(--ab)")+';color:'+(esPagada?"var(--gt)":"var(--at)")+'">'+f.estado+'</span>'+
+        '</div>'+
+        '<div style="display:flex;gap:7px">'+
+          '<button data-fid="'+f.id+'" class="btn-vincular" style="display:flex;align-items:center;gap:5px;padding:7px 13px;border-radius:8px;background:var(--pl);border:1px solid var(--pm);color:var(--p);font-weight:600;font-size:12px;cursor:pointer;font-family:Poppins,sans-serif">'+
+            '<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>'+
+            'Vincular boletas'+
+          '</button>'+
+          '<button data-fid="'+f.id+'" class="btn-toggle-estado" style="padding:7px 13px;border-radius:8px;background:'+(esPagada?"var(--rb)":"var(--gb)")+';border:1px solid '+(esPagada?"#FCCACA":"#A7F3D0")+';color:'+(esPagada?"var(--rt)":"var(--gt)")+';font-weight:600;font-size:12px;cursor:pointer;font-family:Poppins,sans-serif">'+
+            (esPagada?"↩ Marcar pendiente":"✓ Marcar cobrada")+
+          '</button>'+
+          '<button data-fid="'+f.id+'" class="btn-elim-factura" style="padding:7px 10px;border-radius:8px;background:var(--rb);border:1px solid #FCCACA;color:var(--rt);font-weight:600;font-size:12px;cursor:pointer">✕</button>'+
+        '</div>'+
+      '</div>'+
+      // Stats row
+      '<div style="padding:12px 20px;display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:0;background:var(--bg)">'+
+        statCell("Boletas vinculadas",bols.length+" boleta"+(bols.length!==1?"s":""),"var(--t)")+
+        statCell("Suma boletas",fmt(bolSum),"var(--t)")+
+        statCell("Margen",margen.toFixed(1)+"%",margenColor)+
+        statCell("Descripción",f.descripcion||"—","var(--t2)")+
+      '</div>'+
+      // Boletas vinculadas
+      (bols.length>0?
+        '<div style="padding:0 20px 14px">'+
+          '<div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--t3);margin:12px 0 8px">Boletas vinculadas</div>'+
+          '<div style="display:flex;flex-direction:column;gap:4px">'+
+          bols.map(function(b){
+            return '<div style="display:flex;align-items:center;gap:10px;padding:7px 12px;background:var(--gb);border-radius:7px;font-size:12px">'+
+              '<span style="font-weight:600;color:var(--t);flex:1">'+b.nombre+'</span>'+
+              '<span style="color:var(--t3);font-family:DM Mono,monospace;font-size:11px">N°'+b.boleta+'</span>'+
+              '<span style="font-weight:700;color:var(--gt);font-family:DM Mono,monospace">'+fmt(b.liquido||0)+'</span>'+
+              '<button data-fid="'+f.id+'" data-bid="'+b.id+'" class="btn-desv" style="background:none;border:none;cursor:pointer;color:var(--rt);font-size:14px;line-height:1;padding:0 2px">✕</button>'+
+            '</div>';
+          }).join("")+
+          '</div></div>'
+      :"")+
+    '</div>';
+  }).join("");
+  // Wire buttons via event delegation
+  list.querySelectorAll(".btn-vincular").forEach(function(btn){
+    btn.addEventListener("click",function(){abrirVincular(btn.getAttribute("data-fid"));});
+  });
+  list.querySelectorAll(".btn-toggle-estado").forEach(function(btn){
+    btn.addEventListener("click",function(){toggleEstadoFactura(btn.getAttribute("data-fid"));});
+  });
+  list.querySelectorAll(".btn-elim-factura").forEach(function(btn){
+    btn.addEventListener("click",function(){eliminarFactura(btn.getAttribute("data-fid"));});
+  });
+  list.querySelectorAll(".btn-desv").forEach(function(btn){
+    btn.addEventListener("click",function(){desvincularBoleta(btn.getAttribute("data-fid"),btn.getAttribute("data-bid"));});
+  });
+}
+
+function statCell(label,val,color){
+  return '<div style="padding:8px 14px;border-right:1px solid var(--b)">'+
+    '<div style="font-size:10px;color:var(--t3);font-weight:600;text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px">'+label+'</div>'+
+    '<div style="font-size:13px;font-weight:700;color:'+color+'">'+val+'</div>'+
+  '</div>';
+}
+
+function getBolsVinculadas(f){
+  var ids=f.boletasVinculadas||[];
+  return DATA.filter(function(r){return ids.indexOf(String(r.id))>=0||ids.indexOf(r.id)>=0;});
+}
+
+function showModalFactura(){
+  var m=document.getElementById("modFactura");
+  if(m){m.style.display="flex";}
+  // Set today as default date
+  var d=document.getElementById("mfFecha");
+  if(d)d.value=new Date().toISOString().slice(0,10);
+}
+function closeModalFactura(){
+  var m=document.getElementById("modFactura");if(m)m.style.display="none";
+  ["mfNum","mfCliente","mfRut","mfDesc"].forEach(function(id){var el=document.getElementById(id);if(el)el.value="";});
+  var mn=document.getElementById("mfMonto");if(mn)mn.value="";
+}
+function guardarFactura(){
+  var num=document.getElementById("mfNum").value.trim();
+  var cliente=document.getElementById("mfCliente").value.trim();
+  var monto=parseFloat(document.getElementById("mfMonto").value)||0;
+  if(!num||!cliente||!monto){toast("Completa N°, cliente y monto");return;}
+  var f={
+    id:"F"+Date.now(),
+    numero:num,
+    cliente:cliente,
+    rutCliente:document.getElementById("mfRut").value.trim(),
+    fecha:document.getElementById("mfFecha").value||new Date().toLocaleDateString("es-CL"),
+    monto:monto,
+    neto:Math.round(monto/1.19),
+    iva:Math.round(monto-monto/1.19),
+    descripcion:document.getElementById("mfDesc").value.trim(),
+    estado:document.getElementById("mfEstado").value,
+    boletasVinculadas:[]
+  };
+  FACTURAS.push(f);
+  closeModalFactura();
+  save();renderFacturacion();
+  toast("Factura N°"+num+" guardada ✓");
+}
+function toggleEstadoFactura(id){
+  var f=FACTURAS.find(function(x){return x.id===id;});
+  if(!f)return;
+  f.estado=f.estado==="Cobrada"?"Pendiente cobro":"Cobrada";
+  save();renderFacturacion();
+  toast("Estado actualizado ✓");
+}
+function eliminarFactura(id){
+  if(!confirm("¿Eliminar esta factura?"))return;
+  FACTURAS=FACTURAS.filter(function(f){return f.id!==id;});
+  // Desvincular boletas
+  DATA.forEach(function(r){if(r.facturaId===id)delete r.facturaId;});
+  save();renderFacturacion();
+  toast("Factura eliminada");
+}
+
+// ── VINCULAR BOLETAS A FACTURA ────────────────────────────────
+function abrirVincular(facturaId){
+  var f=FACTURAS.find(function(x){return x.id===facturaId;});
+  if(!f)return;
+  vincularFacturaId=facturaId;
+  vincularSelBoletas=new Set(f.boletasVinculadas.map(String));
+  var title=document.getElementById("modVincularTitle");
+  var sub=document.getElementById("modVincularSub");
+  if(title)title.textContent="Vincular boletas — Factura N°"+f.numero;
+  if(sub)sub.textContent=f.cliente+" · "+fmt(f.monto);
+  renderVincularList();
+  var m=document.getElementById("modVincular");
+  if(m)m.style.display="flex";
+}
+function closeModalVincular(){
+  var m=document.getElementById("modVincular");if(m)m.style.display="none";
+  vincularFacturaId=null;vincularSelBoletas=new Set();
+}
+function renderVincularList(){
+  var list=document.getElementById("vincularList");
+  if(!list)return;
+  // Show aprobadas boletas not yet in another factura (or already in this one)
+  var elegibles=DATA.filter(function(r){
+    if(!r.nombre||r.nombre==="nan")return false;
+    if(r.pagado==="Anulada")return false;
+    // Include if already vinculadas to this factura
+    if(vincularSelBoletas.has(String(r.id)))return true;
+    // Exclude if vinculada to another factura
+    var enOtra=FACTURAS.some(function(f){
+      return f.id!==vincularFacturaId&&(f.boletasVinculadas||[]).indexOf(String(r.id))>=0;
+    });
+    return !enOtra;
+  });
+  if(!elegibles.length){
+    list.innerHTML='<div style="padding:24px;text-align:center;color:var(--t3);font-size:13px">No hay boletas disponibles para vincular</div>';
+    return;
+  }
+  list.innerHTML=elegibles.map(function(r){
+    var sel=vincularSelBoletas.has(String(r.id));
+    return '<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--b);background:'+(sel?"#EEEDFE":"#fff")+'">'+
+      '<input type="checkbox" '+(sel?"checked":"")+' data-rid="'+r.id+'" class="cb-vincular" style="accent-color:var(--p);width:15px;height:15px;cursor:pointer">'+
+      '<div style="flex:1">'+
+        '<div style="font-size:12.5px;font-weight:600;color:var(--t)">'+r.nombre+'</div>'+
+        '<div style="font-size:11px;color:var(--t3)">N°'+r.boleta+' · '+r.fecha+(r.empresa?' · '+r.empresa:"")+'</div>'+
+      '</div>'+
+      '<div style="font-family:DM Mono,monospace;font-weight:700;font-size:13px;color:#059669">'+fmt(r.liquido||0)+'</div>'+
+    '</div>';
+  }).join("");
+  updVincularTotal();
+}
+function toggleVincular(id){
+  var sid=String(id);
+  if(vincularSelBoletas.has(sid))vincularSelBoletas.delete(sid);
+  else vincularSelBoletas.add(sid);
+  renderVincularList();
+}
+function updVincularTotal(){
+  var ids=Array.from(vincularSelBoletas);
+  var sum=DATA.filter(function(r){return ids.indexOf(String(r.id))>=0;}).reduce(function(s,r){return s+(r.liquido||0);},0);
+  var el=document.getElementById("vincularTotal");
+  if(el)el.textContent="Total seleccionado: "+fmt(sum)+" · "+ids.length+" boleta"+(ids.length!==1?"s":"");
+}
+function confirmarVinculacion(){
+  var f=FACTURAS.find(function(x){return x.id===vincularFacturaId;});
+  if(!f)return;
+  f.boletasVinculadas=Array.from(vincularSelBoletas);
+  closeModalVincular();
+  save();renderFacturacion();
+  toast("Boletas vinculadas ✓");
+}
+function desvincularBoleta(facturaId,boletaId){
+  var f=FACTURAS.find(function(x){return x.id===facturaId;});
+  if(!f)return;
+  f.boletasVinculadas=f.boletasVinculadas.filter(function(id){return String(id)!==String(boletaId);});
+  save();renderFacturacion();
+  toast("Boleta desvinculada");
+}
+
+// ── IMPORTAR PDF FACTURA NUBOX ────────────────────────────────
+function importFacturaPDF(input){
+  var file=input.files[0];if(!file)return;
+  toast("Leyendo factura...");
+  var reader=new FileReader();
+  reader.onload=function(e){
+    var typedarray=new Uint8Array(e.target.result);
+    pdfjsLib.getDocument({data:typedarray}).promise.then(function(pdf){
+      var texts=[];
+      var promises=[];
+      for(var p=1;p<=pdf.numPages;p++){
+        promises.push(pdf.getPage(p).then(function(page){
+          return page.getTextContent().then(function(tc){
+            return tc.items.map(function(i){return i.str;}).join(" ");
+          });
+        }));
+      }
+      Promise.all(promises).then(function(pages){
+        var text=pages.join(" ");
+        parseFacturaNUBOX(text);
+        input.value="";
+      });
+    }).catch(function(){toast("Error leyendo el PDF");input.value="";});
+  };
+  reader.readAsArrayBuffer(file);
+}
+function parseFacturaNUBOX(text){
+  // Extract fields from NUBOX factura text
+  var num="",cliente="",rutCliente="",fecha="",monto=0,neto=0,iva=0,desc="";
+  // N° Factura
+  var mNum=text.match(/FACTURA ELECTR[OÓ]NICA\s*N[°º]\s*(\d+)/i)||text.match(/N[°º]\s*(\d+)/);
+  if(mNum)num=mNum[1];
+  // RUT cliente
+  var mRut=text.match(/RUT\s+([\d\.]+\-[\dkK])/);
+  if(mRut)rutCliente=mRut[1];
+  // Cliente name — after "Señor(es)"
+  var mCli=text.match(/Se[ñn]or\(es\)\s+([A-ZÁÉÍÓÚÑÜ][A-ZÁÉÍÓÚÑÜ\s]+?)\s+RUT/i);
+  if(mCli)cliente=mCli[1].trim();
+  // Fecha
+  var mFecha=text.match(/Fecha\s+Emisi[oó]n\s+(\d{1,2}\s+de\s+\w+\s+de\s+\d{4})/i);
+  if(mFecha)fecha=mFecha[1];
+  // Monto total
+  var mTotal=text.match(/MONTO TOTAL\s+\$?([\d\.,]+)/i);
+  if(mTotal)monto=parseInt(mTotal[1].replace(/[\.,$\s]/g,""))||0;
+  // Neto
+  var mNeto=text.match(/Monto Neto\s+\$?([\d\.,]+)/i);
+  if(mNeto)neto=parseInt(mNeto[1].replace(/[\.,$\s]/g,""))||0;
+  // IVA
+  var mIva=text.match(/19%\s*IVA\s+\$?([\d\.,]+)/i);
+  if(mIva)iva=parseInt(mIva[1].replace(/[\.,$\s]/g,""))||0;
+  // Descripcion — first item line
+  var mDesc=text.match(/1\s+([^\d$]{5,60?})\s+1\s+\$/);
+  if(mDesc)desc=mDesc[1].trim();
+  if(!num){toast("No se pudo leer el N° de factura del PDF");return;}
+  var f={
+    id:"F"+Date.now(),
+    numero:num,
+    cliente:cliente||"—",
+    rutCliente:rutCliente,
+    fecha:fecha,
+    monto:monto,
+    neto:neto,
+    iva:iva,
+    descripcion:desc,
+    estado:"Pendiente cobro",
+    boletasVinculadas:[]
+  };
+  FACTURAS.push(f);
+  save();renderFacturacion();
+  toast("Factura N°"+num+" importada ✓");
 }
 
 function recargarTodo(){
