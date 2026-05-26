@@ -217,8 +217,15 @@ input[type=checkbox]{accent-color:var(--p);cursor:pointer;width:14px;height:14px
       </div>
       <nav class="sidebar-nav">
         <button class="nav-item on" id="nav-boletas" onclick="showTab('boletas',this)">
-          <span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg></span> Boletas
+          <span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg></span> Pendientes
           <span class="nav-badge" id="navBadgeAlert" style="display:none">!</span>
+        </button>
+        <button class="nav-item" id="nav-aprobadas" onclick="showTab('aprobadas',this)">
+          <span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></span> Aprobadas
+          <span class="nav-badge" id="navBadgeApro" style="display:none">0</span>
+        </button>
+        <button class="nav-item" id="nav-todas" onclick="showTab('todas',this)">
+          <span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></span> Todas
         </button>
         <button class="nav-item" id="nav-empresas" onclick="showTab('empresas',this)">
           <span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg></span> Empresas
@@ -291,6 +298,7 @@ input[type=checkbox]{accent-color:var(--p);cursor:pointer;width:14px;height:14px
 
           <div class="bulk" id="bulk">
             <span id="bct">0 seleccionadas</span>
+            <button class="bb" style="background:#1D4ED8;border-color:#1D4ED8" onclick="aprobarSel()">✓ Aprobar seleccionadas</button>
             <button class="bb" style="background:#1A6B3A;border-color:#1A6B3A" onclick="crearNomina()">💳 Crear Nómina</button>
             <button class="bb" onclick="bMark('pagado','Si')">✓ Tasker pagado</button>
             <button class="bb" onclick="bMark('empresaPago','Si')">✓ Empresa pagó</button>
@@ -327,6 +335,108 @@ input[type=checkbox]{accent-color:var(--p);cursor:pointer;width:14px;height:14px
             </div>
           </div>
           <div class="pgr" id="pgr"></div>
+        </div>
+
+        <!-- TAB APROBADAS -->
+        <div id="tabAprobadas" style="display:none">
+          <div class="kg">
+            <div class="kc" style="--ka:#1D4ED8;--kc:#1E40AF"><div class="kl">Aprobadas</div><div class="kv" id="kApr">—</div></div>
+            <div class="kc" style="--ka:#22C55E;--kc:#0F6E56"><div class="kl">Monto total</div><div class="kv" id="kAprM">—</div></div>
+            <div class="kc" style="--ka:#8B5CF6;--kc:#6D28D9"><div class="kl">Sin datos bancarios</div><div class="kv" id="kAprSin">—</div></div>
+          </div>
+          <div class="toolbar">
+            <input type="text" id="qA" placeholder="🔍  Buscar tasker, RUT, empresa…" oninput="filtA()">
+            <select id="fAE" onchange="filtA()"><option value="">Todas las empresas</option></select>
+            <select id="fAC" onchange="filtA()"><option value="">Categoría</option><option value="B2B">B2B</option><option value="B2C">B2C</option><option value="Rendiciones">Rendiciones</option></select>
+            <select id="fAMes" onchange="filtA()"><option value="">Todos los meses</option></select>
+            <div style="margin-left:auto;display:flex;gap:7px">
+              <button class="tk g" onclick="crearNominaApro()">💳 Crear Nómina</button>
+            </div>
+          </div>
+          <div class="bulk" id="bulkA">
+            <span id="bctA">0 seleccionadas</span>
+            <button class="bb" style="background:#1A6B3A;border-color:#1A6B3A" onclick="crearNominaApro()">💳 Crear Nómina</button>
+            <button class="bb r" onclick="desaprobarSel()">↩ Devolver a pendientes</button>
+            <button class="bb o" onclick="clearSelA()">Cancelar</button>
+          </div>
+          <div class="tc">
+            <div class="tc-scroll">
+              <table>
+                <thead><tr>
+                  <th style="width:32px"><input type="checkbox" id="cbAA" onchange="togAllA(this)"></th>
+                  <th>N° Boleta</th>
+                  <th>Fecha</th>
+                  <th>Tasker</th>
+                  <th>RUT</th>
+                  <th>Bruto</th>
+                  <th>Líquido</th>
+                  <th>Empresa</th>
+                  <th>Empresa pagó</th>
+                  <th>Categoría</th>
+                  <th>N° Nómina</th>
+                </tr></thead>
+                <tbody id="tbA"></tbody>
+              </table>
+            </div>
+            <div id="apro-empty" style="display:none;text-align:center;padding:48px;color:var(--t3)">
+              <div style="font-size:32px;margin-bottom:10px">✅</div>
+              <div style="font-size:14px;font-weight:500">Sin boletas aprobadas</div>
+              <div style="font-size:12px;margin-top:4px">Aprueba boletas desde Pendientes</div>
+            </div>
+          </div>
+          <div class="pgr" id="pgrA"></div>
+        </div>
+
+        <!-- TAB TODAS -->
+        <div id="tabTodas" style="display:none">
+          <div class="kg">
+            <div class="kc" style="--ka:#475569;--kc:#334155"><div class="kl">Total boletas</div><div class="kv" id="kTot">—</div></div>
+            <div class="kc" style="--ka:#22C55E;--kc:#0F6E56"><div class="kl">Pagadas</div><div class="kv" id="kTotPag">—</div></div>
+            <div class="kc" style="--ka:#1D4ED8;--kc:#1E40AF"><div class="kl">En nómina</div><div class="kv" id="kTotNom">—</div></div>
+            <div class="kc" style="--ka:#E07800;--kc:#A85E00"><div class="kl">Pendientes</div><div class="kv" id="kTotPend">—</div></div>
+          </div>
+          <div class="toolbar">
+            <input type="text" id="qT" placeholder="🔍  Buscar tasker, RUT, empresa…" oninput="filtT()">
+            <select id="fTE" onchange="filtT()"><option value="">Todas las empresas</option></select>
+            <select id="fTEst" onchange="filtT()">
+              <option value="">Todos los estados</option>
+              <option value="Pendiente">Pendiente</option>
+              <option value="Aprobada">Aprobada</option>
+              <option value="En Nomina">En Nómina</option>
+              <option value="Si">Pagada</option>
+              <option value="Anulada">Anulada</option>
+            </select>
+            <select id="fTC" onchange="filtT()"><option value="">Categoría</option><option value="B2B">B2B</option><option value="B2C">B2C</option><option value="Rendiciones">Rendiciones</option></select>
+            <select id="fTMes" onchange="filtT()"><option value="">Todos los meses</option></select>
+            <div style="margin-left:auto;">
+              <button class="tk" onclick="expCSVTodas()">↓ Exportar</button>
+            </div>
+          </div>
+          <div class="tc">
+            <div class="tc-scroll">
+              <table>
+                <thead><tr>
+                  <th>N° Boleta</th>
+                  <th>Fecha</th>
+                  <th>Tasker</th>
+                  <th>Empresa</th>
+                  <th>Bruto</th>
+                  <th>Líquido</th>
+                  <th>Categoría</th>
+                  <th>Empresa pagó</th>
+                  <th>Estado</th>
+                  <th>N° Nómina</th>
+                  <th>Fecha Pago</th>
+                </tr></thead>
+                <tbody id="tbT"></tbody>
+              </table>
+            </div>
+            <div id="todas-empty" style="display:none;text-align:center;padding:48px;color:var(--t3)">
+              <div style="font-size:32px;margin-bottom:10px">📋</div>
+              <div style="font-size:14px;font-weight:500">Sin boletas</div>
+            </div>
+          </div>
+          <div class="pgr" id="pgrT"></div>
         </div>
 
         <!-- TAB EMPRESAS -->
@@ -586,7 +696,7 @@ var SCOPES="https://www.googleapis.com/auth/spreadsheets";
 var gToken=null;
 var SHEET_BOLETAS="Boletas";
 var SHEET_EMPRESAS="Empresas";
-var HEADERS_BOLETAS=["id","boleta","estado","fecha","rut","nombre","bruto","retencion","liquido","empresa","activacion","fechaPago","pagado","empresaPago","nomina","categoria"];
+var HEADERS_BOLETAS=["id","boleta","estado","fecha","rut","nombre","bruto","retencion","liquido","empresa","activacion","fechaPago","pagado","empresaPago","nomina","categoria","aprobada","fechaAprobacion"];
 var HEADERS_EMPRESAS=["id","nombre","categoria","contacto"];
 var HEADERS_PROVEEDORES=["rut","nombre","codBanco","banco","cuenta","tipo","email"];
 var HEADERS_NOMINAS=["id","numero","fecha","estado","total","boletas","items"];
@@ -605,9 +715,9 @@ function showSubTab(name,btn){
   btn.classList.add("on");
 }
 
-var TAB_TITLES={"boletas":"Boletas","empresas":"Empresas","metricas":"Métricas","proveedores":"Proveedores","nominas":"Nóminas"};
+var TAB_TITLES={"boletas":"Pendientes","aprobadas":"Aprobadas","todas":"Todas las Boletas","empresas":"Empresas","metricas":"Métricas","proveedores":"Proveedores","nominas":"Nóminas"};
 function showTab(name,btn){
-  ["tabBoletas","tabEmpresas","tabMetricas","tabProveedores","tabNominas"].forEach(function(id){
+  ["tabBoletas","tabAprobadas","tabTodas","tabEmpresas","tabMetricas","tabProveedores","tabNominas"].forEach(function(id){
     document.getElementById(id).style.display="none";
   });
   document.getElementById("tab"+name.charAt(0).toUpperCase()+name.slice(1)).style.display="block";
@@ -618,6 +728,8 @@ function showTab(name,btn){
   if(name==="metricas"){updMetMes();renderMetricas();}
   if(name==="proveedores")renderProveedores();
   if(name==="nominas")renderNominas();
+  if(name==="aprobadas"){updAproE();updAproMes();filtA();kpiApro();}
+  if(name==="todas"){updTodasE();updTodasMes();filtT();kpiTodas();}
 }
 
 // ── AUTH ─────────────────────────────────────────────────────
@@ -801,6 +913,7 @@ function loadD(){
         obj.bruto=parseFloat(obj.bruto)||0;
         obj.retencion=parseFloat(obj.retencion)||0;
         obj.liquido=parseFloat(obj.liquido)||0;
+        obj.aprobada=obj.aprobada==="true"||obj.aprobada===true;
         return obj;
       }).filter(function(r){return r.nombre&&r.nombre!="nan"&&r.boleta&&String(r.boleta).indexOf("TOTAL")<0;});
     } else {
@@ -2033,6 +2146,288 @@ function descargarNomina(id){
   XLSX.utils.book_append_sheet(wb,ws,"Nómina");
   XLSX.writeFile(wb,n.numero+".xlsx");
   toast("Excel "+n.numero+" descargado ✓");
+}
+
+
+// ── APROBADAS ─────────────────────────────────────────────────
+var selA=new Set();
+var fDataA=[];
+var pgA=1;
+var PPA=50;
+
+function updAproE(){
+  var s=document.getElementById("fAE");if(!s)return;
+  var c=s.value;
+  var e=[];
+  DATA.filter(function(r){return r.aprobada;}).forEach(function(r){if(r.empresa&&e.indexOf(r.empresa)<0)e.push(r.empresa);});e.sort();
+  s.innerHTML='<option value="">Todas las empresas</option>'+e.map(function(x){return "<option>"+x+"</option>";}).join("");
+  s.value=c;
+}
+function updAproMes(){
+  var s=document.getElementById("fAMes");if(!s)return;
+  var cur=s.value;
+  var meses={};
+  var ME=["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+  DATA.filter(function(r){return r.aprobada;}).forEach(function(r){
+    if(!r.fecha)return;
+    var d=r.fecha.trim(),yr,mo;
+    var m4=d.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    var m2=d.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+    if(m4){yr=m4[1];mo=parseInt(m4[2]);}
+    else if(m2){mo=parseInt(m2[2]);yr=m2[3];}
+    else return;
+    var key=yr+"-"+(mo<10?"0":"")+mo;
+    if(!meses[key])meses[key]={key:key,yr:yr,mo:mo};
+  });
+  var keys=Object.keys(meses).sort();
+  s.innerHTML='<option value="">Todos los meses</option>'+keys.map(function(k){var m=meses[k];return '<option value="'+k+'">'+ME[m.mo-1]+" "+m.yr+"</option>";}).join("");
+  if(cur&&keys.indexOf(cur)>=0)s.value=cur;else s.value="";
+}
+function filtA(){
+  var q=(document.getElementById("qA")||{}).value||"";q=q.toLowerCase();
+  var em=document.getElementById("fAE")?document.getElementById("fAE").value:"";
+  var ct=document.getElementById("fAC")?document.getElementById("fAC").value:"";
+  var mes=document.getElementById("fAMes")?document.getElementById("fAMes").value:"";
+  fDataA=DATA.filter(function(r){
+    if(!r.aprobada||r.nombre==="nan")return false;
+    if(q&&(r.nombre+r.rut+r.empresa+r.boleta).toLowerCase().indexOf(q)<0)return false;
+    if(em&&r.empresa!==em)return false;
+    if(ct&&r.categoria!==ct)return false;
+    if(mes){
+      var d=r.fecha?r.fecha.trim():"",yr,mo;
+      var m4=d.match(/(\d{4})-(\d{2})-(\d{2})/);
+      var m2=d.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+      if(m4){yr=m4[1];mo=parseInt(m4[2]);}
+      else if(m2){mo=parseInt(m2[2]);yr=m2[3];}
+      else return false;
+      var key=yr+"-"+(mo<10?"0":"")+mo;
+      if(key!==mes)return false;
+    }
+    return true;
+  });
+  pgA=1;renderAprobadas();kpiApro();
+}
+function kpiApro(){
+  var apro=DATA.filter(function(r){return r.aprobada;});
+  var sinDatos=apro.filter(function(r){var p=findProveedor(r.rut);return !p||!p.banco;});
+  var tot=apro.reduce(function(s,r){return s+(r.liquido||0);},0);
+  var el;
+  el=document.getElementById("kApr");if(el)el.textContent=apro.length;
+  el=document.getElementById("kAprM");if(el)el.textContent=fmt(tot);
+  el=document.getElementById("kAprSin");if(el)el.textContent=sinDatos.length;
+  var badge=document.getElementById("navBadgeApro");
+  if(badge){badge.textContent=apro.length;badge.style.display=apro.length>0?"inline":"none";}
+}
+function renderAprobadas(){
+  var tb=document.getElementById("tbA");if(!tb)return;
+  var empty=document.getElementById("apro-empty");
+  var pgr=document.getElementById("pgrA");
+  var start=(pgA-1)*PPA,end=start+PPA;
+  var page=fDataA.slice(start,end);
+  if(fDataA.length===0){tb.innerHTML="";if(empty)empty.style.display="block";if(pgr)pgr.innerHTML="";return;}
+  if(empty)empty.style.display="none";
+  var rows=page.map(function(r){
+    var rid=r.id||r.boleta+r.rut;
+    var s=selA.has(rid);
+    var nomTag=r.nomina?'<span style="background:#ECFDF5;color:#065F46;border:1px solid #A7F3D0;border-radius:4px;padding:1px 6px;font-size:10px;font-weight:600;">'+r.nomina+'</span>':"—";
+    return '<tr style="background:'+(s?"#EEF3FF":"")+'">'+
+      '<td><input type="checkbox" '+(s?"checked ":"")+' onchange="toggleSelA(this,\''+String(rid).replace(/'/g,"\\'")+'\')" ></td>'+
+      '<td>'+r.boleta+'</td>'+
+      '<td>'+r.fecha+'</td>'+
+      '<td style="font-weight:500">'+r.nombre+'</td>'+
+      '<td style="font-family:monospace;font-size:11px">'+r.rut+'</td>'+
+      '<td>'+fmt(r.bruto||0)+'</td>'+
+      '<td style="font-weight:600;color:#065F46">'+fmt(r.liquido||0)+'</td>'+
+      '<td>'+r.empresa+'</td>'+
+      '<td><span style="color:'+(r.empresaPago==="Si"?"#065F46":"#B45309")+';">'+(r.empresaPago==="Si"?"✓ Sí":"⏳ Pendiente")+'</span></td>'+
+      '<td>'+(r.categoria||"—")+'</td>'+
+      '<td>'+nomTag+'</td>'+
+      '</tr>';
+  }).join("");
+  tb.innerHTML=rows;
+  var tp=Math.ceil(fDataA.length/PPA);
+  if(pgr)pgr.innerHTML=tp>1?buildPgr(pgA,tp,"pgA","filtA"):"";
+  var bulk=document.getElementById("bulkA");
+  if(bulk)bulk.style.display=selA.size>0?"flex":"none";
+  var bct=document.getElementById("bctA");
+  if(bct)bct.textContent=selA.size+" seleccionadas";
+  var cbAA=document.getElementById("cbAA");
+  if(cbAA)cbAA.checked=fDataA.length>0&&fDataA.every(function(r){return selA.has(r.id||r.boleta+r.rut);});
+}
+function toggleSelA(cb,id){if(cb.checked)selA.add(id);else selA.delete(id);renderAprobadas();}
+function clearSelA(){selA=new Set();renderAprobadas();}
+function togAllA(cb){
+  if(cb.checked)fDataA.forEach(function(r){selA.add(r.id||r.boleta+r.rut);});
+  else selA=new Set();
+  renderAprobadas();
+}
+function aprobarSel(){
+  if(!sel||sel.size===0){toast("Selecciona boletas primero");return;}
+  var count=0;
+  DATA.forEach(function(r){
+    if(sel.has(r.id)){
+      r.aprobada=true;
+      r.fechaAprobacion=new Date().toLocaleDateString("es-CL");
+      count++;
+    }
+  });
+  clearSel();save();kpiApro();
+  toast(count+" boleta"+(count!==1?"s":"")+" aprobada"+(count!==1?"s":"")+" \u2713");
+}
+function desaprobarSel(){
+  selA.forEach(function(id){
+    var r=DATA.find(function(x){return (x.id||x.boleta+x.rut)==id;});
+    if(r){r.aprobada=false;delete r.fechaAprobacion;}
+  });
+  clearSelA();save();updAproE();updAproMes();filtA();kpiApro();
+  toast("Boletas devueltas a Pendientes");
+}
+function crearNominaApro(){
+  var selIds=Array.from(selA);
+  if(selIds.length===0){toast("Selecciona boletas aprobadas primero");return;}
+  sel=new Set();
+  DATA.forEach(function(r){
+    if(selIds.indexOf(r.id||r.boleta+r.rut)>=0)sel.add(r.id);
+  });
+  clearSelA();
+  crearNomina();
+}
+
+// ── TODAS ─────────────────────────────────────────────────────
+var fDataT=[];
+var pgT=1;
+var PPT=50;
+
+function updTodasE(){
+  var s=document.getElementById("fTE");if(!s)return;
+  var c=s.value;
+  var e=[];DATA.forEach(function(r){if(r.empresa&&e.indexOf(r.empresa)<0)e.push(r.empresa);});e.sort();
+  s.innerHTML='<option value="">Todas las empresas</option>'+e.map(function(x){return "<option>"+x+"</option>";}).join("");
+  s.value=c;
+}
+function updTodasMes(){
+  var s=document.getElementById("fTMes");if(!s)return;
+  var cur=s.value;
+  var meses={};
+  var ME=["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+  DATA.forEach(function(r){
+    if(!r.fecha)return;
+    var d=r.fecha.trim(),yr,mo;
+    var m4=d.match(/(\d{4})-(\d{2})-(\d{2})/);
+    var m2=d.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+    if(m4){yr=m4[1];mo=parseInt(m4[2]);}
+    else if(m2){mo=parseInt(m2[2]);yr=m2[3];}
+    else return;
+    var key=yr+"-"+(mo<10?"0":"")+mo;
+    if(!meses[key])meses[key]={key:key,yr:yr,mo:mo};
+  });
+  var keys=Object.keys(meses).sort();
+  s.innerHTML='<option value="">Todos los meses</option>'+keys.map(function(k){var m=meses[k];return '<option value="'+k+'">'+ME[m.mo-1]+" "+m.yr+"</option>";}).join("");
+  if(cur&&keys.indexOf(cur)>=0)s.value=cur;else s.value="";
+}
+function filtT(){
+  var q=(document.getElementById("qT")||{}).value||"";q=q.toLowerCase();
+  var em=document.getElementById("fTE")?document.getElementById("fTE").value:"";
+  var est=document.getElementById("fTEst")?document.getElementById("fTEst").value:"";
+  var ct=document.getElementById("fTC")?document.getElementById("fTC").value:"";
+  var mes=document.getElementById("fTMes")?document.getElementById("fTMes").value:"";
+  fDataT=DATA.filter(function(r){
+    if(!r.nombre||r.nombre==="nan")return false;
+    if(q&&(r.nombre+r.rut+r.empresa+r.boleta).toLowerCase().indexOf(q)<0)return false;
+    if(em&&r.empresa!==em)return false;
+    if(ct&&r.categoria!==ct)return false;
+    if(est&&getEstadoDisplay(r)!==est)return false;
+    if(mes){
+      var d=r.fecha?r.fecha.trim():"",yr,mo;
+      var m4=d.match(/(\d{4})-(\d{2})-(\d{2})/);
+      var m2=d.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+      if(m4){yr=m4[1];mo=parseInt(m4[2]);}
+      else if(m2){mo=parseInt(m2[2]);yr=m2[3];}
+      else return false;
+      var key=yr+"-"+(mo<10?"0":"")+mo;
+      if(key!==mes)return false;
+    }
+    return true;
+  }).sort(function(a,b){return (b.fecha||"").localeCompare(a.fecha||"");});
+  pgT=1;renderTodas();kpiTodas();
+}
+function getEstadoDisplay(r){
+  if(r.pagado==="Anulada")return "Anulada";
+  if(r.pagado==="Si")return "Si";
+  if(r.nomina)return "En Nomina";
+  if(r.aprobada)return "Aprobada";
+  return "Pendiente";
+}
+function getEstadoBadge(r){
+  var e=getEstadoDisplay(r);
+  var map={"Si":{l:"Pagada",c:"#065F46",bg:"#ECFDF5"},"En Nomina":{l:"En N\u00f3mina",c:"#1D4ED8",bg:"#EEF3FF"},"Aprobada":{l:"Aprobada",c:"#5B21B6",bg:"#EDE9FE"},"Pendiente":{l:"Pendiente",c:"#B45309",bg:"#FFFBEB"},"Anulada":{l:"Anulada",c:"#475569",bg:"#F8FAFC"}};
+  var s=map[e]||map["Pendiente"];
+  return '<span style="background:'+s.bg+';color:'+s.c+';border-radius:4px;padding:2px 8px;font-size:11px;font-weight:600;">'+s.l+'</span>';
+}
+function kpiTodas(){
+  var tot=DATA.filter(function(r){return r.nombre&&r.nombre!=="nan";}).length;
+  var pag=DATA.filter(function(r){return r.pagado==="Si";}).length;
+  var nom=DATA.filter(function(r){return r.nomina&&r.pagado!=="Si";}).length;
+  var pend=DATA.filter(function(r){return !r.aprobada&&!r.nomina&&r.pagado!=="Si"&&r.pagado!=="Anulada";}).length;
+  var el;
+  el=document.getElementById("kTot");if(el)el.textContent=tot;
+  el=document.getElementById("kTotPag");if(el)el.textContent=pag;
+  el=document.getElementById("kTotNom");if(el)el.textContent=nom;
+  el=document.getElementById("kTotPend");if(el)el.textContent=pend;
+}
+function renderTodas(){
+  var tb=document.getElementById("tbT");if(!tb)return;
+  var empty=document.getElementById("todas-empty");
+  var pgr=document.getElementById("pgrT");
+  var start=(pgT-1)*PPT,end=start+PPT;
+  var page=fDataT.slice(start,end);
+  if(fDataT.length===0){tb.innerHTML="";if(empty)empty.style.display="block";if(pgr)pgr.innerHTML="";return;}
+  if(empty)empty.style.display="none";
+  var rows=page.map(function(r){
+    var nomTag=r.nomina?'<span style="background:#ECFDF5;color:#065F46;border:1px solid #A7F3D0;border-radius:4px;padding:1px 6px;font-size:10px;font-weight:600;">'+r.nomina+'</span>':"—";
+    var fechaPago=r.fechaPago?'<span style="color:#065F46;font-size:11px;">'+r.fechaPago+'</span>':"—";
+    return '<tr>'+
+      '<td>'+r.boleta+'</td>'+
+      '<td>'+r.fecha+'</td>'+
+      '<td style="font-weight:500">'+r.nombre+'</td>'+
+      '<td>'+r.empresa+'</td>'+
+      '<td>'+fmt(r.bruto||0)+'</td>'+
+      '<td style="font-weight:600;color:#065F46">'+fmt(r.liquido||0)+'</td>'+
+      '<td>'+(r.categoria||"—")+'</td>'+
+      '<td><span style="color:'+(r.empresaPago==="Si"?"#065F46":"#B45309")+';">'+(r.empresaPago==="Si"?"✓ S\u00ed":"⏳ Pendiente")+'</span></td>'+
+      '<td>'+getEstadoBadge(r)+'</td>'+
+      '<td>'+nomTag+'</td>'+
+      '<td>'+fechaPago+'</td>'+
+      '</tr>';
+  }).join("");
+  tb.innerHTML=rows;
+  var tp=Math.ceil(fDataT.length/PPT);
+  if(pgr)pgr.innerHTML=tp>1?buildPgr(pgT,tp,"pgT","filtT"):"";
+}
+function expCSVTodas(){
+  var cols=["boleta","estado_display","fecha","rut","nombre","bruto","retencion","liquido","empresa","categoria","empresaPago","pagado","nomina","fechaPago","activacion"];
+  var hdr=["N Boleta","Estado","Fecha","RUT","Nombre","Brutos","Retenci\u00f3n","L\u00edquido","Empresa","Categor\u00eda","Empresa Pag\u00f3","Tasker Pagado","N\u00b0 N\u00f3mina","Fecha Pago","Activaci\u00f3n"];
+  var rows=DATA.filter(function(r){return r.nombre&&r.nombre!=="nan";}).map(function(r){
+    r.estado_display=getEstadoDisplay(r);
+    return cols.map(function(c){return '"'+String(r[c]||"").replace(/"/g,'""')+'"';});
+  });
+  var csv=[hdr.map(function(h){return '"'+h+'"';})].concat(rows).map(function(r){return r.join(",");}).join("\n");
+  var a=document.createElement("a");a.href="data:text/csv;charset=utf-8,\uFEFF"+encodeURIComponent(csv);
+  a.download="boletas_historial.csv";a.click();
+}
+
+function buildPgr(pg,tp,pgVar,filtFn){
+  var btns='';
+  btns+='<button onclick="'+pgVar+'=Math.max(1,'+pgVar+'-1);'+filtFn+'()" '+(pg===1?'disabled':'')+'>‹</button>';
+  for(var i=1;i<=tp;i++){
+    if(i===1||i===tp||Math.abs(i-pg)<=1){
+      btns+='<button onclick="'+pgVar+'='+i+';'+filtFn+'()" style="'+(i===pg?'background:var(--p);color:#fff;':'')+' font-weight:'+(i===pg?'700':'400')+'">'+i+'</button>';
+    } else if(Math.abs(i-pg)===2){
+      btns+='<span>…</span>';
+    }
+  }
+  btns+='<button onclick="'+pgVar+'=Math.min('+tp+','+pgVar+'+1);'+filtFn+'()" '+(pg===tp?'disabled':'')+'>›</button>';
+  return btns;
 }
 
 function recargarTodo(){
