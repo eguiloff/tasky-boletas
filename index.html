@@ -406,6 +406,7 @@ input[type=checkbox]{accent-color:var(--p);cursor:pointer;width:14px;height:14px
                   <th>Empresa</th>
                   <th>Empresa pagó</th>
                   <th>Categoría</th>
+                  <th>Cuenta Bancaria</th>
                   <th>N° Nómina</th>
                 </tr></thead>
                 <tbody id="tbA"></tbody>
@@ -1041,9 +1042,10 @@ function loadFromLocal(){
 
 // ── KPI ──────────────────────────────────────────────────────
 function kpi(){
-  var v=DATA.filter(function(r){return r.estado!="ANUL";});
+  var v=DATA.filter(function(r){return r.estado!="ANUL"&&r.pagado!=="Anulada";});
   var p=v.filter(function(r){return r.pagado=="Si";});
-  var pd=v.filter(function(r){return r.pagado!="Si";});
+  // Pendientes = not paid, not approved, not in nomina
+  var pd=v.filter(function(r){return r.pagado!="Si"&&!r.aprobada;});
   var pp=pd.reduce(function(s,r){return s+(r.liquido||0);},0);
   var tp=p.reduce(function(s,r){return s+(r.liquido||0);},0);
   document.getElementById("kP").textContent=fmt(pp);
@@ -1094,6 +1096,9 @@ function filt(){
   var mes=document.getElementById("fMes")?document.getElementById("fMes").value:"";
   fData=DATA.filter(function(r){
     if(!r.nombre||r.nombre=="nan")return false;
+    // Pendientes only shows non-approved, non-paid, non-cancelled
+    if(r.aprobada)return false;
+    if(r.pagado==="Si"||r.pagado==="Anulada")return false;
     if(q&&(r.nombre+r.rut+r.empresa+r.boleta).toLowerCase().indexOf(q)<0)return false;
     if(em&&r.empresa!=em)return false;
     if(pa&&(r.pagado||"Pendiente")!=pa)return false;
@@ -2288,9 +2293,15 @@ function renderAprobadas(){
   var rows=page.map(function(r){
     var rid=r.id||r.boleta+r.rut;
     var s=selA.has(rid);
+    var prov2=findProveedor(r.rut);
+    var hasBanco=!!(prov2&&prov2.banco&&prov2.n_cuenta);
     var nomTag=r.nomina?'<span style="background:#ECFDF5;color:#065F46;border:1px solid #A7F3D0;border-radius:4px;padding:1px 6px;font-size:10px;font-weight:600;">'+r.nomina+'</span>':"—";
-    return '<tr style="background:'+(s?"#EEF3FF":"")+'">'+
-      '<td><input type="checkbox" '+(s?"checked ":"")+' onchange="toggleSelA(this,\''+String(rid).replace(/'/g,"\\'")+'\')" ></td>'+
+    var bancoTag=hasBanco
+      ?('<span style="background:#ECFDF5;color:#065F46;border:1px solid #A7F3D0;border-radius:4px;padding:2px 8px;font-size:11px;font-weight:600;">✓ '+prov2.banco+'</span>')
+      :('<button class="btn-add-banco" data-rut="'+r.rut+'" style="background:#FEF2F2;color:#DC2626;border:1px solid #FECACA;border-radius:6px;padding:2px 9px;font-size:11px;font-weight:600;cursor:pointer;">⚠ Agregar cuenta</button>');
+    var ridS=String(rid);
+    return '<tr style="background:'+(s?"#EEF3FF":"transparent")+'">'+
+      '<td onclick="event.stopPropagation()"><input type="checkbox" '+(s?"checked ":"")+' data-rid="'+ridS+'" onchange="toggleSelA(this,this.dataset.rid)"></td>'+
       '<td>'+r.boleta+'</td>'+
       '<td>'+r.fecha+'</td>'+
       '<td style="font-weight:500">'+r.nombre+'</td>'+
@@ -2298,12 +2309,22 @@ function renderAprobadas(){
       '<td>'+fmt(r.bruto||0)+'</td>'+
       '<td style="font-weight:600;color:#065F46">'+fmt(r.liquido||0)+'</td>'+
       '<td>'+r.empresa+'</td>'+
-      '<td><span style="color:'+(r.empresaPago==="Si"?"#065F46":"#B45309")+';">'+(r.empresaPago==="Si"?"✓ Sí":"⏳ Pendiente")+'</span></td>'+
+      '<td><span style="color:'+(r.empresaPago==="Si"?"#065F46":"#B45309")+'">'+(r.empresaPago==="Si"?"✓ Sí":"⏳ Pendiente")+'</span></td>'+
       '<td>'+(r.categoria||"—")+'</td>'+
+      '<td>'+bancoTag+'</td>'+
       '<td>'+nomTag+'</td>'+
       '</tr>';
   }).join("");
   tb.innerHTML=rows;
+  // Wire up banco buttons via event delegation
+  tb.querySelectorAll(".btn-add-banco").forEach(function(btn){
+    btn.addEventListener("click",function(e){
+      e.stopPropagation();
+      var rut=btn.getAttribute("data-rut");
+      var r2=DATA.find(function(d){return d.rut===rut;});
+      abrirModProvApro(rut, r2?r2.nombre:rut);
+    });
+  });
   var tp=Math.ceil(fDataA.length/PPA);
   if(pgr)pgr.innerHTML=tp>1?buildPgr(pgA,tp,"pgA","filtA"):"";
   var bulk=document.getElementById("bulkA");
@@ -2323,15 +2344,22 @@ function togAllA(cb){
 function aprobarSel(){
   if(!sel||sel.size===0){toast("Selecciona boletas primero");return;}
   var count=0;
+  var selArr=Array.from(sel).map(String);
   DATA.forEach(function(r){
-    if(sel.has(r.id)){
+    if(selArr.indexOf(String(r.id))>=0){
       r.aprobada=true;
       r.fechaAprobacion=new Date().toLocaleDateString("es-CL");
       count++;
     }
   });
-  clearSel();save();kpiApro();
-  toast(count+" boleta"+(count!==1?"s":"")+" aprobada"+(count!==1?"s":"")+" \u2713");
+  if(count===0){toast("No se encontraron boletas para aprobar");return;}
+  clearSel();save();
+  filt();kpi();updNavBadges();
+  // Switch to Aprobadas tab
+  var btn=document.getElementById("nav-aprobadas");
+  if(btn)showTab("aprobadas",btn);
+  updAproE();updAproMes();filtA();kpiApro();
+  toast(count+" boleta"+(count!==1?"s":"")+" aprobada"+(count!==1?"s":"")+" ✓");
 }
 function desaprobarSel(){
   selA.forEach(function(id){
@@ -2340,6 +2368,74 @@ function desaprobarSel(){
   });
   clearSelA();save();updAproE();updAproMes();filtA();kpiApro();
   toast("Boletas devueltas a Pendientes");
+}
+function abrirModProvApro(rut, nombre){
+  // Find or create proveedor entry
+  var p=findProveedor(rut)||{rut:rut,nombre:nombre||rut};
+  // Open the existing proveedor modal
+  openModProv(rut, nombre, function(){
+    // After saving, refresh aprobadas view
+    filtA();kpiApro();updNavBadges();
+  });
+}
+function openModProv(rut, nombre, onSaved){
+  // Build inline modal for adding bank data
+  var existMod=document.getElementById("modProvApro");
+  if(existMod)existMod.remove();
+  var p=findProveedor(rut)||{rut:rut,nombre:nombre||rut,banco:"",n_cuenta:"",tipo_cuenta:"Cuenta Corriente"};
+  var BANCOS_LIST=["Banco de Chile","Banco Estado","Santander","BCI","Banco BICE","Banco Falabella","Banco Security","Scotiabank","Banco Itaú","Mercado Pago","Otro"];
+  var TIPOS_LIST=["Cuenta Corriente","Cuenta Vista","Cuenta de Ahorro","Cuenta RUT"];
+  var mod=document.createElement("div");
+  mod.id="modProvApro";
+  mod.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,0.45);display:flex;align-items:center;justify-content:center;z-index:3000;";
+  mod.innerHTML='<div style="background:#fff;border-radius:16px;padding:28px;width:420px;max-width:92vw;box-shadow:0 20px 60px rgba(0,0,0,0.15);">'+
+    '<div style="font-size:16px;font-weight:700;color:#0F172A;margin-bottom:4px;">Datos bancarios</div>'+
+    '<div style="font-size:12px;color:#64748B;margin-bottom:20px;">'+p.nombre+'</div>'+
+    '<div style="margin-bottom:14px;"><label style="font-size:11px;font-weight:600;color:#475569;text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:6px;">Banco</label>'+
+    '<select id="mpBanco" style="width:100%;background:#F8F9FC;border:1.5px solid #E8ECF4;border-radius:8px;padding:9px 12px;font-size:13px;color:#0F172A;font-family:Poppins,sans-serif;">'+
+    BANCOS_LIST.map(function(b){return '<option value="'+b+'"'+(b===p.banco?' selected':'')+'>'+b+'</option>';}).join('')+
+    '</select></div>'+
+    '<div style="margin-bottom:14px;"><label style="font-size:11px;font-weight:600;color:#475569;text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:6px;">Tipo de cuenta</label>'+
+    '<select id="mpTipo" style="width:100%;background:#F8F9FC;border:1.5px solid #E8ECF4;border-radius:8px;padding:9px 12px;font-size:13px;color:#0F172A;font-family:Poppins,sans-serif;">'+
+    TIPOS_LIST.map(function(t){return '<option value="'+t+'"'+(t===p.tipo_cuenta?' selected':'')+'>'+t+'</option>';}).join('')+
+    '</select></div>'+
+    '<div style="margin-bottom:22px;"><label style="font-size:11px;font-weight:600;color:#475569;text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:6px;">Número de cuenta</label>'+
+    '<input id="mpCuenta" value="'+(p.n_cuenta||"")+'" placeholder="000123456789" style="width:100%;background:#F8F9FC;border:1.5px solid #E8ECF4;border-radius:8px;padding:9px 12px;font-size:13px;color:#0F172A;font-family:monospace;box-sizing:border-box;"></div>'+
+    '<div style="display:flex;gap:8px;">'+
+    '<button id="btnGuardarBanco" data-rut="'+rut+'" style="flex:1;padding:11px 0;border-radius:9px;background:linear-gradient(135deg,#6B5CE7,#5548C8);color:#fff;font-weight:700;font-size:13px;border:none;cursor:pointer;font-family:Poppins,sans-serif;">Guardar</button>'+
+    '<button id="btnCancelBanco" style="padding:11px 16px;border-radius:9px;background:#F8F9FC;border:1.5px solid #E8ECF4;color:#475569;font-weight:600;font-size:13px;cursor:pointer;font-family:Poppins,sans-serif;">Cancelar</button>'+
+    '</div></div>';
+  mod.onclick=function(e){if(e.target===mod)mod.remove();};
+  document.body.appendChild(mod);
+  // Wire save button
+  var saveBtn=document.getElementById("btnGuardarBanco");
+  if(saveBtn){saveBtn.addEventListener("click",function(){guardarBancoApro(saveBtn.getAttribute("data-rut"));});}
+  var cancelBtn=document.getElementById("btnCancelBanco");
+  if(cancelBtn){cancelBtn.addEventListener("click",function(){document.getElementById("modProvApro").remove();});}
+  // Store callback
+  mod._onSaved=onSaved;
+}
+function guardarBancoApro(rut){
+  var banco=document.getElementById("mpBanco").value;
+  var tipo=document.getElementById("mpTipo").value;
+  var cuenta=document.getElementById("mpCuenta").value.trim();
+  if(!banco||!cuenta){toast("Completa banco y número de cuenta");return;}
+  // Update or create proveedor
+  var found=false;
+  PROVEEDORES.forEach(function(p){
+    if(p.rut===rut){p.banco=banco;p.n_cuenta=cuenta;p.tipo_cuenta=tipo;found=true;}
+  });
+  if(!found){
+    var r=DATA.find(function(d){return d.rut===rut;});
+    PROVEEDORES.push({rut:rut,nombre:r?r.nombre:rut,banco:banco,n_cuenta:cuenta,tipo_cuenta:tipo,email:""});
+  }
+  save();
+  var mod=document.getElementById("modProvApro");
+  if(mod&&mod._onSaved)mod._onSaved();
+  if(mod)mod.remove();
+  toast("Cuenta bancaria guardada ✓");
+  filtA();kpiApro();updNavBadges();
+  checkAlerts();
 }
 function crearNominaApro(){
   var selIds=Array.from(selA);
