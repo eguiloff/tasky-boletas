@@ -972,6 +972,11 @@ function loadD(){
         obj.retencion=parseFloat(obj.retencion)||0;
         obj.liquido=parseFloat(obj.liquido)||0;
         obj.aprobada=obj.aprobada===true||String(obj.aprobada).toLowerCase()==="true";
+        // Ensure string fields have safe defaults
+        if(!obj.pagado)obj.pagado="Pendiente";
+        if(!obj.empresaPago)obj.empresaPago="Pendiente";
+        if(!obj.estado)obj.estado="VIG";
+        if(!obj.id)obj.id=Date.now()+Math.random();
         return obj;
       }).filter(function(r){return r.nombre&&r.nombre!="nan"&&r.boleta&&String(r.boleta).indexOf("TOTAL")<0;});
     } else {
