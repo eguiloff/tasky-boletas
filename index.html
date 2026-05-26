@@ -332,7 +332,6 @@ input[type=checkbox]{accent-color:var(--p);cursor:pointer;width:14px;height:14px
           <div class="bulk" id="bulk">
             <span id="bct">0 seleccionadas</span>
             <button class="bb" style="background:#1D4ED8;border-color:#1D4ED8" onclick="aprobarSel()">✓ Aprobar seleccionadas</button>
-            <button class="bb" style="background:#1A6B3A;border-color:#1A6B3A" onclick="crearNomina()">💳 Crear Nómina</button>
             <button class="bb" onclick="bMark('pagado','Si')">✓ Tasker pagado</button>
             <button class="bb" onclick="bMark('empresaPago','Si')">✓ Empresa pagó</button>
             <button class="bb r" onclick="bMark('pagado','Anulada')">✕ Anular</button>
@@ -2297,7 +2296,7 @@ function renderAprobadas(){
     var hasBanco=!!(prov2&&prov2.banco&&(prov2.cuenta||prov2.n_cuenta));
     var nomTag=r.nomina?'<span style="background:#ECFDF5;color:#065F46;border:1px solid #A7F3D0;border-radius:4px;padding:1px 6px;font-size:10px;font-weight:600;">'+r.nomina+'</span>':"—";
     var bancoTag=hasBanco
-      ?('<span style="background:#ECFDF5;color:#065F46;border:1px solid #A7F3D0;border-radius:4px;padding:2px 8px;font-size:11px;font-weight:600;">✓ '+prov2.banco+'</span>')
+      ?('<span style="background:#ECFDF5;color:#065F46;border:1px solid #A7F3D0;border-radius:4px;padding:2px 8px;font-size:11px;font-weight:600;display:inline-block;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:middle;">✓ '+prov2.banco+'</span>')
       :('<button class="btn-add-banco" data-rut="'+r.rut+'" style="background:#FEF2F2;color:#DC2626;border:1px solid #FECACA;border-radius:6px;padding:2px 9px;font-size:11px;font-weight:600;cursor:pointer;">⚠ Agregar cuenta</button>');
     var ridS=String(rid);
     return '<tr style="background:'+(s?"#EEF3FF":"transparent")+'">'+
