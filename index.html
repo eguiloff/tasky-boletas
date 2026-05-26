@@ -38,6 +38,21 @@ body{font-family:'Poppins',sans-serif;background:var(--bg);color:var(--t);font-s
 .nav-icon{font-size:16px;width:20px;text-align:center;flex-shrink:0}
 .nav-badge{margin-left:auto;background:var(--rt);color:#fff;font-size:10px;font-weight:600;padding:1px 6px;border-radius:10px;min-width:18px;text-align:center}
 .nav-item.on .nav-badge{background:rgba(255,255,255,.3);color:#fff}
+.nav-group-header{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:9px;font-size:13px;font-weight:600;color:var(--t2);cursor:pointer;border:none;background:none;font-family:'Poppins',sans-serif;width:100%;text-align:left;transition:all .15s}
+.nav-group-header:hover{background:var(--pl);color:var(--p)}
+.nav-group-header.on{background:var(--pl);color:var(--p)}
+.nav-group-badge{margin-left:auto;background:var(--p);color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;min-width:20px;text-align:center}
+.nav-group-header.on .nav-group-badge{background:var(--p)}
+.nav-chevron{margin-left:4px;transition:transform .2s;display:flex;align-items:center;}
+.nav-chevron.open{transform:rotate(90deg)}
+.nav-sub-list{display:flex;flex-direction:column;gap:1px;padding:2px 0 4px 14px;margin-left:10px;border-left:2px solid var(--b)}
+.nav-sub-item{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:8px;font-size:12.5px;font-weight:400;color:var(--t2);cursor:pointer;border:none;background:none;font-family:'Poppins',sans-serif;width:100%;text-align:left;transition:all .13s}
+.nav-sub-item:hover{background:var(--pl);color:var(--p)}
+.nav-sub-item.on{color:var(--t);font-weight:600;background:var(--pl)}
+.nav-sub-dot{width:7px;height:7px;border-radius:50%;background:var(--b2);flex-shrink:0;transition:all .15s}
+.nav-sub-item.on .nav-sub-dot{background:var(--p)}
+.nav-sub-badge{margin-left:auto;background:var(--bg);color:var(--t3);border:1px solid var(--b);font-size:10px;font-weight:600;padding:1px 7px;border-radius:10px;min-width:20px;text-align:center}
+.nav-sub-item.on .nav-sub-badge{background:var(--pl);color:var(--p);border-color:var(--pl)}
 .sidebar-footer{padding:14px 16px;border-top:1px solid var(--b)}
 .user-info{display:flex;align-items:center;gap:9px}
 .user-avatar{width:32px;height:32px;border-radius:50%;background:var(--p);color:#fff;font-size:13px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0}
@@ -216,17 +231,38 @@ input[type=checkbox]{accent-color:var(--p);cursor:pointer;width:14px;height:14px
         <div class="logo-sub">Boletas de Honorarios</div>
       </div>
       <nav class="sidebar-nav">
-        <button class="nav-item on" id="nav-boletas" onclick="showTab('boletas',this)">
-          <span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg></span> Pendientes
-          <span class="nav-badge" id="navBadgeAlert" style="display:none">!</span>
+
+        <!-- GRUPO DOCUMENTOS -->
+        <button class="nav-group-header on" id="nav-group-docs" onclick="toggleDocGroup()">
+          <span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg></span>
+          Documentos
+          <span class="nav-group-badge" id="navBadgeTotal">0</span>
+          <span class="nav-chevron open" id="docChevron"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></span>
         </button>
-        <button class="nav-item" id="nav-aprobadas" onclick="showTab('aprobadas',this)">
-          <span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></span> Aprobadas
-          <span class="nav-badge" id="navBadgeApro" style="display:none">0</span>
-        </button>
-        <button class="nav-item" id="nav-todas" onclick="showTab('todas',this)">
-          <span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></span> Todas
-        </button>
+        <div id="docSubList" class="nav-sub-list">
+          <button class="nav-sub-item on" id="nav-boletas" onclick="showTab('boletas',this)">
+            <span class="nav-sub-dot"></span>
+            Pendientes
+            <span class="nav-sub-badge" id="navBadgePend">0</span>
+          </button>
+          <button class="nav-sub-item" id="nav-aprobadas" onclick="showTab('aprobadas',this)">
+            <span class="nav-sub-dot"></span>
+            Aprobadas
+            <span class="nav-sub-badge" id="navBadgeApro">0</span>
+          </button>
+          <button class="nav-sub-item" id="nav-nominas" onclick="showTab('nominas',this)">
+            <span class="nav-sub-dot"></span>
+            Nóminas
+            <span class="nav-sub-badge" id="navBadgeNom">0</span>
+          </button>
+          <button class="nav-sub-item" id="nav-todas" onclick="showTab('todas',this)">
+            <span class="nav-sub-dot"></span>
+            Todas
+            <span class="nav-sub-badge" id="navBadgeTodas">0</span>
+          </button>
+        </div>
+
+        <!-- RESTO -->
         <button class="nav-item" id="nav-empresas" onclick="showTab('empresas',this)">
           <span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg></span> Empresas
         </button>
@@ -236,9 +272,6 @@ input[type=checkbox]{accent-color:var(--p);cursor:pointer;width:14px;height:14px
         <button class="nav-item" id="nav-proveedores" onclick="showTab('proveedores',this)">
           <span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/><path d="M16 3.13a4 4 0 010 7.75"/><path d="M21 21v-2a4 4 0 00-3-3.87"/></svg></span> Proveedores
           <span class="nav-badge" id="navBadgeProv" style="display:none">!</span>
-        </button>
-        <button class="nav-item" id="nav-nominas" onclick="showTab('nominas',this)">
-          <span class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></span> Nóminas
         </button>
       </nav>
       <div class="sidebar-footer">
@@ -721,8 +754,13 @@ function showTab(name,btn){
     document.getElementById(id).style.display="none";
   });
   document.getElementById("tab"+name.charAt(0).toUpperCase()+name.slice(1)).style.display="block";
-  document.querySelectorAll(".nav-item").forEach(function(t){t.classList.remove("on");});
+  // Clear all active states
+  document.querySelectorAll(".nav-item,.nav-sub-item").forEach(function(t){t.classList.remove("on");});
   btn.classList.add("on");
+  // Keep group header highlighted if a doc sub-item is active
+  var docTabs=["boletas","aprobadas","nominas","todas"];
+  var grp=document.getElementById("nav-group-docs");
+  if(grp){grp.classList.toggle("on",docTabs.indexOf(name)>=0);}
   document.getElementById("topbarTitle").textContent=TAB_TITLES[name]||name;
   if(name==="empresas")renderEmpresas();
   if(name==="metricas"){updMetMes();renderMetricas();}
@@ -730,6 +768,26 @@ function showTab(name,btn){
   if(name==="nominas")renderNominas();
   if(name==="aprobadas"){updAproE();updAproMes();filtA();kpiApro();}
   if(name==="todas"){updTodasE();updTodasMes();filtT();kpiTodas();}
+}
+function toggleDocGroup(){
+  var list=document.getElementById("docSubList");
+  var chevron=document.getElementById("docChevron");
+  if(!list)return;
+  var open=list.style.display!=="none";
+  list.style.display=open?"none":"flex";
+  if(chevron)chevron.classList.toggle("open",!open);
+}
+function updNavBadges(){
+  var pend=DATA.filter(function(r){return r.nombre&&r.nombre!=="nan"&&!r.aprobada&&r.pagado!=="Si"&&r.pagado!=="Anulada"&&!r.nomina;}).length;
+  var apro=DATA.filter(function(r){return r.aprobada;}).length;
+  var nom=NOMINAS?NOMINAS.length:0;
+  var tot=DATA.filter(function(r){return r.nombre&&r.nombre!=="nan";}).length;
+  var el;
+  el=document.getElementById("navBadgePend");if(el)el.textContent=pend;
+  el=document.getElementById("navBadgeApro");if(el){el.textContent=apro;el.style.display=apro>0?"inline":"none";}
+  el=document.getElementById("navBadgeNom");if(el)el.textContent=nom;
+  el=document.getElementById("navBadgeTodas");if(el)el.textContent=tot;
+  el=document.getElementById("navBadgeTotal");if(el)el.textContent=tot;
 }
 
 // ── AUTH ─────────────────────────────────────────────────────
@@ -959,7 +1017,7 @@ function loadD(){
             var nm=localStorage.getItem("tk_n");
             if(nm){try{NOMINAS=JSON.parse(nm);}catch(e){NOMINAS=[];}}
           }
-          setSave("ok");updE();updMes();filt();kpi();checkAlerts();syncProveedoresFromData();
+          setSave("ok");updE();updMes();filt();kpi();checkAlerts();syncProveedoresFromData();updNavBadges();
         });
       });
     });
@@ -978,7 +1036,7 @@ function loadFromLocal(){
   if(p){try{PROVEEDORES=JSON.parse(p);}catch(e){PROVEEDORES=[];}}
   var nm=localStorage.getItem("tk_n");
   if(nm){try{NOMINAS=JSON.parse(nm);}catch(e){NOMINAS=[];}}
-  setSave("ok");updE();updMes();filt();kpi();checkAlerts();syncProveedoresFromData();
+  setSave("ok");updE();updMes();filt();kpi();checkAlerts();syncProveedoresFromData();updNavBadges();
 }
 
 // ── KPI ──────────────────────────────────────────────────────
@@ -992,6 +1050,7 @@ function kpi(){
   document.getElementById("kV").textContent=fmt(tp);
   document.getElementById("kPg").textContent=p.length;
   document.getElementById("kPd").textContent=pd.length;
+  updNavBadges();
 }
 
 // ── FILTERS ──────────────────────────────────────────────────
