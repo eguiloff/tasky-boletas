@@ -889,12 +889,9 @@ function fallbackSave(){
 }
 
 function ensureHeaders(sheetName,headers,cb){
-  sheetsReq("GET","/values/"+sheetName+"!A1:Z1",null,function(res){
-    if(!res||!res.values||!res.values[0]||res.values[0].length===0){
-      sheetsReq("PUT","/values/"+sheetName+"!A1:Z1?valueInputOption=RAW",
-        {values:[headers]},function(){if(cb)cb();});
-    } else {if(cb)cb();}
-  });
+  // Always write headers to ensure correct column order
+  sheetsReq("PUT","/values/"+encodeURIComponent(sheetName+"!A1")+
+    "?valueInputOption=RAW",{values:[headers]},function(){if(cb)cb();});
 }
 
 function save(){
