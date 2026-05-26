@@ -2344,15 +2344,28 @@ function togAllA(cb){
 function aprobarSel(){
   if(!sel||sel.size===0){toast("Selecciona boletas primero");return;}
   var count=0;
-  // sel stores DATA indices, not IDs
-  sel.forEach(function(i){
-    var r=DATA[i];
-    if(r&&r.pagado!=="Anulada"){
+  // sel stores DATA indices (numbers)
+  var indices=Array.from(sel);
+  indices.forEach(function(i){
+    var idx=parseInt(i);
+    var r=DATA[idx];
+    if(r&&r.pagado!=="Anulada"&&r.estado!=="ANUL"){
       r.aprobada=true;
       r.fechaAprobacion=new Date().toLocaleDateString("es-CL");
       count++;
     }
   });
+  if(count===0){
+    // fallback: try matching by visible rows
+    var vis=fData.slice((page-1)*PG,page*PG);
+    vis.forEach(function(r){
+      if(sel.has(DATA.indexOf(r))&&r.pagado!=="Anulada"&&r.estado!=="ANUL"){
+        r.aprobada=true;
+        r.fechaAprobacion=new Date().toLocaleDateString("es-CL");
+        count++;
+      }
+    });
+  }
   if(count===0){toast("No se encontraron boletas para aprobar");return;}
   clearSel();save();
   filt();kpi();updNavBadges();
