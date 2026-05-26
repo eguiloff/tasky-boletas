@@ -839,6 +839,7 @@ function loadD(){
               try{obj.items=JSON.parse(obj.items||"[]");}catch(e){obj.items=[];}
               obj.total=parseFloat(obj.total)||0;
               obj.id=parseInt(obj.id)||Date.now();
+              if(!obj.numero)obj.numero="NOM-"+String(obj.id).slice(-3);
               return obj;
             });
           } else {
@@ -1888,7 +1889,13 @@ function crearNomina(){
 }
 
 function buildNomina(selBoletas){
-  var num="NOM-"+(NOMINAS.length+1).toString().padStart(3,"0");
+  // Use max existing numero to avoid duplicates after reload
+  var maxN=0;
+  NOMINAS.forEach(function(n){
+    var m=n.numero?parseInt((n.numero+"").replace(/[^0-9]/g,""))||0:0;
+    if(m>maxN)maxN=m;
+  });
+  var num="NOM-"+(maxN+1).toString().padStart(3,"0");
   var nomina={
     id:Date.now(),
     numero:num,
