@@ -1321,10 +1321,17 @@ function parseSIIText(items){
 
 function normFecha(s){
   if(!s)return "";
-  s=String(s).replace(" 00:00:00","").trim();
-  // Convert yyyy-mm-dd to dd/mm/yyyy
+  s=String(s).replace(" 00:00:00","").replace("T00:00:00","").trim();
+  // yyyy-mm-dd -> dd/mm/yyyy
   if(/^\d{4}-\d{2}-\d{2}$/.test(s)){
     var p=s.split("-");return p[2]+"/"+p[1]+"/"+p[0];
+  }
+  // d/m/yyyy or d-m-yyyy -> dd/mm/yyyy (zero-pad)
+  var m=s.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/);
+  if(m){
+    var d=m[1].length===1?"0"+m[1]:m[1];
+    var mo=m[2].length===1?"0"+m[2]:m[2];
+    return d+"/"+mo+"/"+m[3];
   }
   return s;
 }
@@ -1388,8 +1395,8 @@ function importF(inp){
 }
 function parseL(txt,fn){
   var res=Papa.parse(txt,{header:true,skipEmptyLines:true});
-  DATA=res.data.map(function(r,i){
-    return {id:Date.now()+i,boleta:r["N° Boleta"]||r["boleta"]||"",estado:r["Estado"]||"VIG",fecha:r["Fecha"]||r["fecha"]||"",
+  var parsed=res.data.map(function(r,i){
+    return {id:Date.now()+i,boleta:r["N° Boleta"]||r["boleta"]||"",estado:r["Estado"]||"VIG",fecha:normFecha(r["Fecha"]||r["fecha"]||""),
       rut:r["RUT Emisor"]||r["RUT"]||r["rut"]||"",nombre:r["Nombre / Razón Social"]||r["Nombre"]||r["nombre"]||"",
       bruto:parseFloat((r["Brutos"]||r["bruto"]||"0").toString().replace(/[^0-9.-]/g,""))||0,
       retencion:parseFloat((r["Retención"]||r["Retencion"]||"0").toString().replace(/[^0-9.-]/g,""))||0,
@@ -1400,19 +1407,49 @@ function parseL(txt,fn){
       activacion:r["Activación"]||r["Activacion"]||r["activacion"]||"",
       fechaPago:r["Fecha Pago Esperada"]||r["fechaPago"]||""};
   }).filter(function(r){return r.nombre&&r.nombre!="nan"&&r.rut&&r.rut!="nan";});
-  // Auto-add new empresas to catalog
-  var newEmps=[];
-  DATA.forEach(function(r){
-    if(!r.empresa)return;
-    var exists=false;
-    EMPRESAS.forEach(function(e){if(e.nombre==r.empresa)exists=true;});
-    if(!exists&&newEmps.indexOf(r.empresa)<0)newEmps.push(r.empresa);
+  // MERGE: update existing or add new (same logic as PDF merge)
+  var added=0,updated=0,newEmps=[];
+  parsed.forEach(function(nr){
+    var nrut=normRutMerge(nr.rut);
+    var nfecha=normFecha(nr.fecha);
+    var nboleta=String(nr.boleta).trim();
+    var existing=null;
+    for(var j=0;j<DATA.length;j++){
+      var r=DATA[j];
+      if(normRutMerge(r.rut)===nrut && String(r.boleta).trim()===nboleta && normFecha(r.fecha)===nfecha){
+        existing=r; break;
+      }
+    }
+    if(existing){
+      // Preserve manual fields (empresa, pagado, empresaPago, nomina, categoria, activacion, fechaPago)
+      // Only update SII fields + nombre
+      existing.estado=nr.estado;
+      existing.bruto=nr.bruto;
+      existing.retencion=nr.retencion;
+      existing.liquido=nr.liquido;
+      existing.nombre=nr.nombre;
+      // Preserve empresa/categoria/pagado unless empty in existing
+      if(!existing.empresa&&nr.empresa)existing.empresa=nr.empresa;
+      if(!existing.categoria&&nr.categoria)existing.categoria=nr.categoria;
+      if(nr.pagado&&nr.pagado!="Pendiente")existing.pagado=nr.pagado;
+      if(nr.empresaPago&&nr.empresaPago!="Pendiente")existing.empresaPago=nr.empresaPago;
+      if(nr.nomina)existing.nomina=nr.nomina;
+      updated++;
+    } else {
+      DATA.push(nr);
+      added++;
+    }
+    if(nr.empresa){
+      var exists=false;
+      EMPRESAS.forEach(function(e){if(e.nombre==nr.empresa)exists=true;});
+      if(!exists&&newEmps.indexOf(nr.empresa)<0)newEmps.push(nr.empresa);
+    }
   });
   newEmps.forEach(function(n){
     EMPRESAS.push({id:Date.now()+Math.random(),nombre:n,categoria:"",contacto:""});
   });
   updE();updMes();filt();kpi();save();
-  toast(DATA.length+" boletas importadas"+(newEmps.length?" · "+newEmps.length+" empresa"+(newEmps.length!=1?"s":"")+" nueva"+(newEmps.length!=1?"s":"")+" agregada"+(newEmps.length!=1?"s":""):""));
+  toast(added+" nuevas, "+updated+" actualizadas"+(newEmps.length?" · "+newEmps.length+" empresa"+(newEmps.length!=1?"s":"")+" nueva"+(newEmps.length!=1?"s":""):""));
 }
 function expCSV(){
   var cols=["boleta","estado","fecha","rut","nombre","bruto","retencion","liquido","empresa","activacion","fechaPago","pagado","empresaPago","nomina","categoria","_nota"];
