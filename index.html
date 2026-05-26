@@ -2273,7 +2273,7 @@ function filtA(){
 }
 function kpiApro(){
   var apro=DATA.filter(function(r){return r.aprobada;});
-  var sinDatos=apro.filter(function(r){var p=findProveedor(r.rut);return !p||!p.banco;});
+  var sinDatos=apro.filter(function(r){var p=findProveedor(r.rut);return !p||!p.banco||(!p.cuenta&&!p.n_cuenta);});
   var tot=apro.reduce(function(s,r){return s+(r.liquido||0);},0);
   var el;
   el=document.getElementById("kApr");if(el)el.textContent=apro.length;
@@ -2294,7 +2294,7 @@ function renderAprobadas(){
     var rid=r.id||r.boleta+r.rut;
     var s=selA.has(rid);
     var prov2=findProveedor(r.rut);
-    var hasBanco=!!(prov2&&prov2.banco&&prov2.n_cuenta);
+    var hasBanco=!!(prov2&&prov2.banco&&(prov2.cuenta||prov2.n_cuenta));
     var nomTag=r.nomina?'<span style="background:#ECFDF5;color:#065F46;border:1px solid #A7F3D0;border-radius:4px;padding:1px 6px;font-size:10px;font-weight:600;">'+r.nomina+'</span>':"—";
     var bancoTag=hasBanco
       ?('<span style="background:#ECFDF5;color:#065F46;border:1px solid #A7F3D0;border-radius:4px;padding:2px 8px;font-size:11px;font-weight:600;">✓ '+prov2.banco+'</span>')
@@ -2437,11 +2437,11 @@ function guardarBancoApro(rut){
   // Update or create proveedor
   var found=false;
   PROVEEDORES.forEach(function(p){
-    if(p.rut===rut){p.banco=banco;p.n_cuenta=cuenta;p.tipo_cuenta=tipo;found=true;}
+    if(normalizeRut(p.rut)===normalizeRut(rut)){p.banco=banco;p.cuenta=cuenta;p.n_cuenta=cuenta;p.tipo=tipo;p.tipo_cuenta=tipo;found=true;}
   });
   if(!found){
     var r=DATA.find(function(d){return d.rut===rut;});
-    PROVEEDORES.push({rut:rut,nombre:r?r.nombre:rut,banco:banco,n_cuenta:cuenta,tipo_cuenta:tipo,email:""});
+    PROVEEDORES.push({rut:rut,nombre:r?r.nombre:rut,banco:banco,cuenta:cuenta,n_cuenta:cuenta,tipo:tipo,tipo_cuenta:tipo,email:""});
   }
   save();
   var mod=document.getElementById("modProvApro");
