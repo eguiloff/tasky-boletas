@@ -949,9 +949,19 @@ function onIn(n){
 function tryAutoLogin(){
   var savedUser=localStorage.getItem("tk_u");
   if(!savedUser)return;
+  // Enter app immediately with cached data
   var savedToken=localStorage.getItem("tk_gtoken");
   if(savedToken){gToken=savedToken;}
   onIn(savedUser);
+  // Then silently refresh token in background
+  setTimeout(function(){
+    autoRefreshToken(function(ok){
+      if(ok){
+        // Token renewed — reload fresh data from Sheets
+        loadD();
+      }
+    });
+  }, 500);
 }
 
 function autoRefreshToken(cb){
