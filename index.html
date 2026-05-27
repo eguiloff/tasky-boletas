@@ -2786,18 +2786,22 @@ function accionTodas(rid,accion){
   var r=DATA.find(function(x){return String(x.id||x.boleta+x.rut)===String(rid);});
   if(!r){toast("Boleta no encontrada");return;}
   if(accion==="despagar"){
-    if(!confirm("¿Marcar esta boleta como no pagada y devolverla a Aprobadas?"))return;
+    if(!confirm("¿Marcar esta boleta como no pagada?"))return;
     r.pagado="Pendiente";
     r.aprobada=true;
+    r.nomina="";  // desligar de nómina
     toast("Boleta devuelta a Aprobadas ✓");
   } else if(accion==="desaprobar"){
     if(!confirm("¿Devolver esta boleta a Pendientes?"))return;
     r.aprobada=false;
+    r.pagado="Pendiente";
+    r.nomina="";
     delete r.fechaAprobacion;
     toast("Boleta devuelta a Pendientes ✓");
   } else if(accion==="desanular"){
     r.pagado="Pendiente";
     r.estado="VIG";
+    r.aprobada=false;
     toast("Boleta restaurada a Pendientes ✓");
   }
   save();filtT();kpiTodas();kpi();updNavBadges();
