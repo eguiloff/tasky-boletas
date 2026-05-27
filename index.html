@@ -2310,6 +2310,11 @@ function buildNomina(selBoletas){
   toast("Nómina "+num+" creada ✓");
 }
 
+var nominasOpen={};
+function toggleNomina(id){
+  nominasOpen[id]=!nominasOpen[id];
+  renderNominas();
+}
 function renderNominas(){
   var el=document.getElementById("nominasList");
   var empty=document.getElementById("nominasEmpty");
@@ -2318,50 +2323,67 @@ function renderNominas(){
   var html="";
   NOMINAS.slice().reverse().forEach(function(n){
     var isPag=n.estado==="Pagada";
+    var isOpen=!!nominasOpen[n.id];
     var estadoBadge=isPag
       ? '<span style="background:var(--gb);color:var(--gt);padding:2px 10px;border-radius:20px;font-size:11px;font-weight:600">✓ Pagada</span>'
       : '<span style="background:var(--ab);color:var(--at);padding:2px 10px;border-radius:20px;font-size:11px;font-weight:600">⏳ Pendiente</span>';
-    var pagarBtn=isPag?"":"<button class='bb' onclick='pagarNomina("+n.id+")'>✓ Marcar pagada</button>";
-    var descargarBtn="<button class='tk' onclick='descargarNomina("+n.id+")'>↓ Excel Santander</button>";
-    var eliminarBtn="<button class='tk' style='color:var(--rt);border-color:#FCCACA' onclick='eliminarNomina("+n.id+")'>✕ Eliminar</button>";
+    var pagarBtn=isPag?"":"<button class='bb' onclick='pagarNomina("+n.id+")' style='font-size:11px'>✓ Marcar pagada</button>";
+    var descargarBtn="<button class='tk' onclick='descargarNomina("+n.id+")' style='font-size:11px'>↓ Excel Santander</button>";
+    var eliminarBtn="<button class='tk' style='color:var(--rt);border-color:#FCCACA;font-size:11px' onclick='eliminarNomina("+n.id+")'>✕ Eliminar</button>";
     var borderColor=isPag?"#B7E4C7":"var(--b)";
-    
-    var itemRows="";
-    n.items.forEach(function(it,ii){
-      var bg=ii%2===0?"#fff":"var(--bg)";
-      itemRows+="<tr style='background:"+bg+"'>";
-      itemRows+="<td style='padding:7px 10px;border-bottom:1px solid var(--b);font-weight:500;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap'>"+it.nombre+"</td>";
-      itemRows+="<td style='padding:7px 10px;border-bottom:1px solid var(--b);font-family:DM Mono,monospace;font-size:11px'>N°"+it.boleta+"</td>";
-      itemRows+="<td style='padding:7px 10px;border-bottom:1px solid var(--b)'>"+it.banco+"</td>";
-      itemRows+="<td style='padding:7px 10px;border-bottom:1px solid var(--b);font-family:DM Mono,monospace;font-size:11px'>"+it.cuenta+"</td>";
-      itemRows+="<td style='padding:7px 10px;border-bottom:1px solid var(--b)'>"+it.tipo+"</td>";
-      itemRows+="<td style='padding:7px 10px;border-bottom:1px solid var(--b);font-family:DM Mono,monospace;font-weight:600'>"+fmt(it.liquido)+"</td>";
-      itemRows+="</tr>";
-    });
+    var chevron=isOpen
+      ? '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 15l-6-6-6 6"/></svg>'
+      : '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>';
 
-    html+="<div style='background:var(--s);border:1.5px solid "+borderColor+";border-radius:14px;padding:20px 22px;box-shadow:var(--shadow)'>";
-    html+="<div style='display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px'>";
-    html+="<div style='display:flex;align-items:center;gap:12px'>";
-    html+="<div style='font-size:16px;font-weight:700;color:var(--t)'>"+n.numero+"</div>";
+    html+="<div style='background:var(--s);border:1.5px solid "+borderColor+";border-radius:14px;overflow:hidden;box-shadow:var(--shadow)'>";
+    // Header row — always visible, clickable to expand
+    html+="<div data-nid='"+n.id+"' class='nom-header'";
+    html+="<div style='color:var(--t2)'>" + chevron + "</div>";
+    html+="<div style='font-size:15px;font-weight:700;color:var(--t)'>"+n.numero+"</div>";
     html+="<div style='font-size:12px;color:var(--t3)'>"+n.fecha+"</div>";
     html+=estadoBadge;
     html+="</div>";
-    html+="<div style='display:flex;align-items:center;gap:8px'>";
-    html+="<div style='font-size:20px;font-weight:700;font-family:DM Mono,monospace;color:var(--t)'>"+fmt(n.total)+"</div>";
+    html+="<div style='display:flex;align-items:center;gap:8px' onclick='event.stopPropagation()'>";
+    html+="<div style='font-size:18px;font-weight:700;font-family:DM Mono,monospace;color:var(--t)'>"+fmt(n.total)+"</div>";
     html+="<div style='font-size:12px;color:var(--t3)'>"+n.items.length+" tasker"+(n.items.length!==1?"s":"")+"</div>";
     html+=pagarBtn;
     html+=descargarBtn;
     html+=eliminarBtn;
     html+="</div></div>";
-    html+="<div style='overflow-x:auto'>";
-    html+="<table style='width:100%;border-collapse:collapse;font-size:12px;min-width:500px'>";
-    html+="<thead><tr style='background:var(--bg)'>";
-    ["Tasker","Boleta","Banco","N° Cuenta","Tipo","Líquido"].forEach(function(h){
-      html+="<th style='padding:7px 10px;text-align:left;font-size:10px;font-weight:600;color:var(--t3);text-transform:uppercase;border-bottom:1px solid var(--b)'>"+h+"</th>";
-    });
-    html+="</tr></thead><tbody>"+itemRows+"</tbody></table></div></div>";
+
+    // Detail — only shown when open
+    if(isOpen){
+      var itemRows="";
+      n.items.forEach(function(it,ii){
+        var bg=ii%2===0?"#fff":"var(--bg)";
+        itemRows+="<tr style='background:"+bg+"'>";
+        itemRows+="<td style='padding:8px 12px;border-bottom:1px solid var(--b);font-weight:500'>"+it.nombre+"</td>";
+        itemRows+="<td style='padding:8px 12px;border-bottom:1px solid var(--b);font-family:DM Mono,monospace;font-size:11px'>N°"+it.boleta+"</td>";
+        itemRows+="<td style='padding:8px 12px;border-bottom:1px solid var(--b)'>"+it.banco+"</td>";
+        itemRows+="<td style='padding:8px 12px;border-bottom:1px solid var(--b);font-family:DM Mono,monospace;font-size:11px'>"+it.cuenta+"</td>";
+        itemRows+="<td style='padding:8px 12px;border-bottom:1px solid var(--b)'>"+it.tipo+"</td>";
+        itemRows+="<td style='padding:8px 12px;border-bottom:1px solid var(--b);font-family:DM Mono,monospace;font-weight:600;color:#059669'>"+fmt(it.liquido)+"</td>";
+        itemRows+="</tr>";
+      });
+      html+="<div style='border-top:1px solid var(--b);overflow-x:auto'>";
+      html+="<table style='width:100%;border-collapse:collapse;font-size:12px;min-width:500px'>";
+      html+="<thead><tr style='background:var(--bg)'>";
+      ["Tasker","Boleta","Banco","N° Cuenta","Tipo","Líquido"].forEach(function(h){
+        html+="<th style='padding:8px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--b)'>"+h+"</th>";
+      });
+      html+="</tr></thead><tbody>"+itemRows+"</tbody></table></div>";
+    }
+    html+="</div>";
   });
   el.innerHTML=html;
+  el.querySelectorAll(".nom-header").forEach(function(h){
+    h.addEventListener("mouseover",function(){h.style.background="var(--bg)";});
+    h.addEventListener("mouseout",function(){h.style.background="";});
+    h.addEventListener("click",function(e){
+      if(e.target.closest(".bb,.tk"))return;
+      toggleNomina(h.getAttribute("data-nid"));
+    });
+  });
 }
 
 function eliminarNomina(id){
