@@ -999,6 +999,7 @@ function fallbackSave(){
   localStorage.setItem("tk_e",JSON.stringify(EMPRESAS));
   localStorage.setItem("tk_p",JSON.stringify(PROVEEDORES));
   localStorage.setItem("tk_n",JSON.stringify(NOMINAS));
+  localStorage.setItem("tk_f",JSON.stringify(FACTURAS));
 }
 
 function ensureHeaders(sheetName,headers,cb){
@@ -1182,6 +1183,8 @@ function loadFromLocal(){
   if(p){try{PROVEEDORES=JSON.parse(p);}catch(e){PROVEEDORES=[];}}
   var nm=localStorage.getItem("tk_n");
   if(nm){try{NOMINAS=JSON.parse(nm);}catch(e){NOMINAS=[];}}
+  var fk=localStorage.getItem("tk_f");
+  if(fk){try{FACTURAS=JSON.parse(fk);}catch(e){FACTURAS=[];}}
   setSave("ok");updE();updMes();filt();kpi();checkAlerts();syncProveedoresFromData();updNavBadges();
 }
 
