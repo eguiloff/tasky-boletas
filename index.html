@@ -935,6 +935,7 @@ function connectGoogle(){
 function onIn(n){
   document.getElementById("aw").style.display="none";
   document.getElementById("ma").style.display="block";
+  startTokenRefreshTimer();
   var av=document.getElementById("userAvatar");
   var un=document.getElementById("userName");
   if(av)av.textContent=n.charAt(0).toUpperCase();
@@ -948,6 +949,34 @@ function tryAutoLogin(){
   var savedToken=localStorage.getItem("tk_gtoken");
   if(savedToken){gToken=savedToken;}
   onIn(savedUser);
+}
+
+function autoRefreshToken(cb){
+  var savedUser=localStorage.getItem("tk_u");
+  if(!savedUser||typeof google==="undefined"){if(cb)cb(false);return;}
+  try{
+    var client=google.accounts.oauth2.initTokenClient({
+      client_id:CLIENT_ID,scope:SCOPES,prompt:"",
+      callback:function(resp){
+        if(!resp.error){
+          gToken=resp.access_token;
+          localStorage.setItem("tk_gtoken",gToken);
+          if(cb)cb(true);
+        } else {if(cb)cb(false);}
+      }
+    });
+    client.requestAccessToken({prompt:""});
+  }catch(e){if(cb)cb(false);}
+}
+
+// Proactively refresh token every 45 minutes (token lasts 1 hour)
+function startTokenRefreshTimer(){
+  setInterval(function(){
+    if(!gToken)return;
+    autoRefreshToken(function(ok){
+      if(ok)console.log("Token renovado automáticamente");
+    });
+  }, 45*60*1000);
 }
 
 function initGoogleClient(){
@@ -989,7 +1018,15 @@ function sheetsReq(method,path,body,cb){
   var opts={method:method,headers:{"Authorization":"Bearer "+gToken,"Content-Type":"application/json"}};
   if(body)opts.body=JSON.stringify(body);
   fetch(url,opts).then(function(r){
-    if(r.status===401){gToken=null;localStorage.removeItem("tk_gtoken");toast("Sesión expirada, vuelve a ingresar");setSave("");return;}
+    if(r.status===401){
+      gToken=null;localStorage.removeItem("tk_gtoken");
+      // Auto-refresh token silently
+      autoRefreshToken(function(ok){
+        if(ok){sheetsReq(method,path,body,cb);}
+        else{toast("Sesión expirada — reconectando...");setSave("");}
+      });
+      return;
+    }
     return r.json();
   }).then(function(data){if(cb)cb(data);}).catch(function(e){console.error(e);fallbackSave();if(cb)cb(null);});
 }
