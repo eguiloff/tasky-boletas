@@ -292,11 +292,10 @@ input[type=checkbox]{accent-color:var(--p);cursor:pointer;width:14px;height:14px
       <header class="topbar">
         <div class="topbar-title" id="topbarTitle">Boletas</div>
         <div class="topbar-right">
-          <button onclick="recargarTodo()" title="Actualizar datos desde Sheets" style="display:flex;align-items:center;gap:6px;padding:7px 13px;border-radius:8px;border:1.5px solid var(--b);background:var(--s);color:var(--t2);font-family:Poppins,sans-serif;font-size:12px;font-weight:500;cursor:pointer;transition:all .15s" onmouseover="this.style.borderColor='var(--p)';this.style.color='var(--p)'" onmouseout="this.style.borderColor='var(--b)';this.style.color='var(--t2)'">
-            <svg id="refreshIcon" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
-            Actualizar
-          </button>
           <div class="ss"><div class="dot" id="dot"></div><span id="st"></span></div>
+          <button onclick="recargarTodo()" title="Actualizar datos" style="width:34px;height:34px;border-radius:8px;border:1.5px solid var(--b);background:var(--s);color:var(--t2);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s" onmouseover="this.style.borderColor='var(--p)';this.style.color='var(--p)';this.style.background='var(--pl)'" onmouseout="this.style.borderColor='var(--b)';this.style.color='var(--t2)';this.style.background='var(--s)'">
+            <svg id="refreshIcon" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+          </button>
         </div>
       </header>
 
