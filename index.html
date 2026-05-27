@@ -464,6 +464,7 @@ input[type=checkbox]{accent-color:var(--p);cursor:pointer;width:14px;height:14px
                   <th>Estado</th>
                   <th>N° Nómina</th>
                   <th>Fecha Pago</th>
+                  <th>Acciones</th>
                 </tr></thead>
                 <tbody id="tbT"></tbody>
               </table>
@@ -2708,6 +2709,15 @@ function renderTodas(){
   var rows=page.map(function(r){
     var nomTag=r.nomina?'<span style="background:#ECFDF5;color:#065F46;border:1px solid #A7F3D0;border-radius:4px;padding:1px 6px;font-size:10px;font-weight:600;">'+r.nomina+'</span>':"—";
     var fechaPago=r.fechaPago?'<span style="color:#065F46;font-size:11px;">'+r.fechaPago+'</span>':"—";
+    var rid2=String(r.id||r.boleta+r.rut);
+    var est2=getEstadoDisplay(r);
+    var accionBtn=est2==="Si"
+      ?'<button data-rid="'+rid2+'" class="btn-t-accion" data-accion="despagar" style="padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600;border:1px solid #FECACA;background:#FEF2F2;color:#DC2626;cursor:pointer;white-space:nowrap;font-family:Poppins,sans-serif">↩ Deshacer pago</button>'
+      :est2==="Aprobada"
+      ?'<button data-rid="'+rid2+'" class="btn-t-accion" data-accion="desaprobar" style="padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600;border:1px solid var(--b);background:var(--bg);color:var(--t2);cursor:pointer;white-space:nowrap;font-family:Poppins,sans-serif">↩ A pendiente</button>'
+      :est2==="Anulada"
+      ?'<button data-rid="'+rid2+'" class="btn-t-accion" data-accion="desanular" style="padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600;border:1px solid var(--b);background:var(--bg);color:var(--t2);cursor:pointer;white-space:nowrap;font-family:Poppins,sans-serif">↩ Restaurar</button>'
+      :"";
     return '<tr>'+
       '<td>'+r.boleta+'</td>'+
       '<td>'+r.fecha+'</td>'+
@@ -2716,15 +2726,42 @@ function renderTodas(){
       '<td>'+fmt(r.bruto||0)+'</td>'+
       '<td style="font-weight:600;color:#065F46">'+fmt(r.liquido||0)+'</td>'+
       '<td>'+(r.categoria||"—")+'</td>'+
-      '<td><span style="color:'+(r.empresaPago==="Si"?"#065F46":"#B45309")+';">'+(r.empresaPago==="Si"?"✓ S\u00ed":"⏳ Pendiente")+'</span></td>'+
+      '<td><span style="color:'+(r.empresaPago==="Si"?"#065F46":"#B45309")+'">'+(r.empresaPago==="Si"?"✓ Sí":"⏳ Pendiente")+'</span></td>'+
       '<td>'+getEstadoBadge(r)+'</td>'+
       '<td>'+nomTag+'</td>'+
       '<td>'+fechaPago+'</td>'+
+      '<td>'+accionBtn+'</td>'+
       '</tr>';
   }).join("");
   tb.innerHTML=rows;
+  tb.querySelectorAll(".btn-t-accion").forEach(function(btn){
+    btn.addEventListener("click",function(){
+      accionTodas(btn.getAttribute("data-rid"),btn.getAttribute("data-accion"));
+    });
+  });
   var tp=Math.ceil(fDataT.length/PPT);
   if(pgr)pgr.innerHTML=tp>1?buildPgr(pgT,tp,"pgT","filtT"):"";
+}
+function accionTodas(rid,accion){
+  var r=DATA.find(function(x){return String(x.id||x.boleta+x.rut)===String(rid);});
+  if(!r){toast("Boleta no encontrada");return;}
+  if(accion==="despagar"){
+    if(!confirm("¿Marcar esta boleta como no pagada y devolverla a Aprobadas?"))return;
+    r.pagado="Pendiente";
+    r.aprobada=true;
+    toast("Boleta devuelta a Aprobadas ✓");
+  } else if(accion==="desaprobar"){
+    if(!confirm("¿Devolver esta boleta a Pendientes?"))return;
+    r.aprobada=false;
+    delete r.fechaAprobacion;
+    toast("Boleta devuelta a Pendientes ✓");
+  } else if(accion==="desanular"){
+    r.pagado="Pendiente";
+    r.estado="VIG";
+    toast("Boleta restaurada a Pendientes ✓");
+  }
+  save();filtT();kpiTodas();kpi();updNavBadges();
+  if(accion==="desaprobar"||accion==="despagar"){filtA();kpiApro();}
 }
 function expCSVTodas(){
   var cols=["boleta","estado_display","fecha","rut","nombre","bruto","retencion","liquido","empresa","categoria","empresaPago","pagado","nomina","fechaPago","activacion"];
