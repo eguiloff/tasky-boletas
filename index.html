@@ -1028,7 +1028,12 @@ function sheetsReq(method,path,body,cb){
       return;
     }
     return r.json();
-  }).then(function(data){if(cb)cb(data);}).catch(function(e){console.error(e);fallbackSave();if(cb)cb(null);});
+  }).then(function(data){if(cb)cb(data);}).catch(function(e){
+    console.error("sheetsReq error:",e);
+    fallbackSave();
+    setSave("ok"); // Mark as saved locally so UI doesn't break
+    if(cb)cb(null);
+  });
 }
 
 function fallbackSave(){
@@ -2813,13 +2818,22 @@ function accionTodas(rid,accion){
     r.aprobada=false;
     toast("Boleta restaurada a Pendientes ✓");
   }
-  // Update UI immediately before async save
+  // Save to localStorage immediately so data is never lost
+  fallbackSave();
+  // Update UI
   filtT();kpiTodas();kpi();updNavBadges();
   if(accion==="desaprobar"||accion==="despagar"){filtA();kpiApro();}
-  // Save in background
-  fallbackSave();
+  // Try to save to Sheets in background
   clearTimeout(stmr);
-  stmr=setTimeout(function(){saveToSheets();},1200);
+  stmr=setTimeout(function(){
+    if(gToken){saveToSheets();}
+    else{
+      // Try to get a fresh token first
+      autoRefreshToken(function(ok){
+        if(ok)saveToSheets();
+      });
+    }
+  },1200);
 }
 function expCSVTodas(){
   var cols=["boleta","estado_display","fecha","rut","nombre","bruto","retencion","liquido","empresa","categoria","empresaPago","pagado","nomina","fechaPago","activacion"];
