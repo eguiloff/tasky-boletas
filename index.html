@@ -1093,19 +1093,17 @@ function saveProveedoresSheet(){
 }
 
 function saveFacturasSheet(){
-  ensureHeaders(SHEET_FACTURAS,HEADERS_FACTURAS,function(){
-    var rows=FACTURAS.map(function(f){
-      return HEADERS_FACTURAS.map(function(h){
-        if(h==="boletasVinculadas")return JSON.stringify(f.boletasVinculadas||[]);
-        return f[h]!==undefined?f[h]:"";
-      });
-    });
-    sheetsReq("DELETE","/values/"+encodeURIComponent(SHEET_FACTURAS+"!A2:Z")+":clear",{},function(){
-      if(!rows.length){setSave("ok");return;}
-      sheetsReq("PUT","/values/"+encodeURIComponent(SHEET_FACTURAS+"!A2")+"?valueInputOption=RAW",
-        {values:rows},function(){setSave("ok");});
+  if(!FACTURAS.length){setSave("ok");return;}
+  var rows=FACTURAS.map(function(f){
+    return HEADERS_FACTURAS.map(function(h){
+      if(h==="boletasVinculadas")return JSON.stringify(f.boletasVinculadas||[]);
+      return f[h]!==undefined?f[h]:"";
     });
   });
+  // Write headers+data in one shot to avoid 404 on clear
+  var allRows=[HEADERS_FACTURAS].concat(rows);
+  sheetsReq("PUT","/values/"+encodeURIComponent(SHEET_FACTURAS+"!A1")+"?valueInputOption=RAW",
+    {values:allRows},function(){setSave("ok");});
 }
 function saveNominasSheet(){
   ensureHeaders(SHEET_NOMINAS,HEADERS_NOMINAS,function(){
@@ -2815,8 +2813,13 @@ function accionTodas(rid,accion){
     r.aprobada=false;
     toast("Boleta restaurada a Pendientes ✓");
   }
-  save();filtT();kpiTodas();kpi();updNavBadges();
+  // Update UI immediately before async save
+  filtT();kpiTodas();kpi();updNavBadges();
   if(accion==="desaprobar"||accion==="despagar"){filtA();kpiApro();}
+  // Save in background
+  fallbackSave();
+  clearTimeout(stmr);
+  stmr=setTimeout(function(){saveToSheets();},1200);
 }
 function expCSVTodas(){
   var cols=["boleta","estado_display","fecha","rut","nombre","bruto","retencion","liquido","empresa","categoria","empresaPago","pagado","nomina","fechaPago","activacion"];
