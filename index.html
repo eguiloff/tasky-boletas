@@ -2783,8 +2783,19 @@ function renderTodas(){
   if(pgr)pgr.innerHTML=tp>1?buildPgr(pgT,tp,"pgT","filtT"):"";
 }
 function accionTodas(rid,accion){
-  var r=DATA.find(function(x){return String(x.id||x.boleta+x.rut)===String(rid);});
-  if(!r){toast("Boleta no encontrada");return;}
+  // Debug: log what we're searching for
+  console.log("accionTodas rid=",rid,"accion=",accion);
+  console.log("DATA ids sample:",DATA.slice(0,3).map(function(x){return {id:x.id,boleta:x.boleta,rut:x.rut,pagado:x.pagado};}));
+  var r=DATA.find(function(x){
+    var xrid=String(x.id||x.boleta+x.rut);
+    return xrid===String(rid);
+  });
+  if(!r){
+    // Fallback: try matching by boleta number if rid looks like a boleta
+    r=DATA.find(function(x){return String(x.boleta)===String(rid);});
+    if(!r){toast("Boleta no encontrada (rid="+rid+")");return;}
+  }
+  console.log("Found boleta:",r.boleta,r.nombre,r.pagado);
   if(accion==="despagar"){
     if(!confirm("¿Marcar esta boleta como no pagada?"))return;
     r.pagado="Pendiente";
