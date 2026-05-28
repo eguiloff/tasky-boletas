@@ -2457,10 +2457,19 @@ function eliminarNomina(id){
   if(n.boletas&&n.boletas.length){
     n.boletas.forEach(function(bid){
       var r=DATA.find(function(x){return String(x.id)==String(bid);});
-      if(r&&!r.pagado||r&&r.pagado==="Pendiente"){
-        r.nomina="";
-        r.aprobada=true;
-      }
+      if(r&&r.pagado!=="Si"){r.nomina="";r.aprobada=true;}
+    });
+  }
+  // Also check by items RUT in case nomina field has different value
+  if(n.items&&n.items.length){
+    n.items.forEach(function(it){
+      var nrut=normalizeRut(it.rut||"");
+      DATA.forEach(function(r){
+        if(normalizeRut(r.rut)===nrut&&r.pagado!=="Si"&&(r.nomina===num||r.nomina===""||!r.aprobada)){
+          r.nomina="";
+          r.aprobada=true;
+        }
+      });
     });
   }
   NOMINAS=NOMINAS.filter(function(x){return x.id!=id;});
