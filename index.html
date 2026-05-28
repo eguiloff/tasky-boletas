@@ -2770,14 +2770,25 @@ function guardarBancoApro(rut){
   var email=(document.getElementById("apEmail")||{}).value||"";
   email=email.trim();
   if(!banco||!cuenta){toast("Completa banco y número de cuenta");return;}
+  // Get codBanco from BANCOS_LIST
+  var codBanco="";
+  if(typeof BANCOS_LIST!=="undefined"){
+    BANCOS_LIST.forEach(function(b){if(b.n===banco)codBanco=b.c;});
+  }
   // Update or create proveedor
   var found=false;
   PROVEEDORES.forEach(function(p){
-    if(normalizeRut(p.rut)===normalizeRut(rut)){p.banco=banco;p.cuenta=cuenta;p.n_cuenta=cuenta;p.tipo=tipo;p.tipo_cuenta=tipo;if(email)p.email=email;found=true;}
+    if(normalizeRut(p.rut)===normalizeRut(rut)){
+      p.banco=banco;p.codBanco=codBanco;
+      p.cuenta=cuenta;p.n_cuenta=cuenta;
+      p.tipo=tipo;p.tipo_cuenta=tipo;
+      if(email)p.email=email;
+      found=true;
+    }
   });
   if(!found){
-    var r=DATA.find(function(d){return d.rut===rut;});
-    PROVEEDORES.push({rut:rut,nombre:r?r.nombre:rut,banco:banco,cuenta:cuenta,n_cuenta:cuenta,tipo:tipo,tipo_cuenta:tipo,email:email});
+    var r=DATA.find(function(d){return normalizeRut(d.rut)===normalizeRut(rut);});
+    PROVEEDORES.push({rut:rut,nombre:r?r.nombre:rut,banco:banco,codBanco:codBanco,cuenta:cuenta,n_cuenta:cuenta,tipo:tipo,tipo_cuenta:tipo,email:email});
   }
   save();
   var mod=document.getElementById("modProvApro");
