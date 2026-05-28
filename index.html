@@ -2569,7 +2569,8 @@ function renderAprobadas(){
   if(fDataA.length===0){tb.innerHTML="";if(empty)empty.style.display="block";if(pgr)pgr.innerHTML="";return;}
   if(empty)empty.style.display="none";
   var rows=page.map(function(r){
-    var rid=r.id||r.boleta+r.rut;
+    var idx2=DATA.indexOf(r);
+    var rid=String(r.id||idx2);
     var s=selA.has(rid);
     var prov2=findProveedor(r.rut);
     var hasBanco=!!(prov2&&prov2.banco&&(prov2.cuenta||prov2.n_cuenta));
@@ -2610,23 +2611,22 @@ function renderAprobadas(){
   var bct=document.getElementById("bctA");
   if(bct)bct.textContent=selA.size+" seleccionadas";
   var cbAA=document.getElementById("cbAA");
-  if(cbAA)cbAA.checked=fDataA.length>0&&fDataA.every(function(r){return selA.has(r.id||r.boleta+r.rut);});
+  if(cbAA)cbAA.checked=fDataA.length>0&&fDataA.every(function(r){return selA.has(String(r.id||DATA.indexOf(r)));});
 }
 function toggleSelA(cb,id){if(cb.checked)selA.add(String(id));else selA.delete(String(id));renderAprobadas();}
 function clearSelA(){selA=new Set();renderAprobadas();}
 function togAllA(cb){
   if(cb.checked){
-    // Select ALL aprobadas — skip only those confirmed to have NO bank data
-    var allApro=DATA.filter(function(r){return r.aprobada&&r.nombre&&r.nombre!=="nan";});
-    allApro.forEach(function(r){
+    // Select ALL aprobadas with bank data using DATA index as unique key
+    DATA.forEach(function(r,i){
+      if(!r.aprobada||!r.nombre||r.nombre==="nan")return;
       var prov2=findProveedor(r.rut);
-      // Try both normalized and raw RUT match
       if(!prov2){
         var normR=normalizeRut(r.rut);
         prov2=PROVEEDORES.find(function(p){return normalizeRut(p.rut)===normR;});
       }
       var hasBanco=!!(prov2&&prov2.banco&&(prov2.cuenta||prov2.n_cuenta));
-      if(hasBanco)selA.add(String(r.id||r.boleta+r.rut));
+      if(hasBanco)selA.add(String(r.id||i));
     });
   } else selA=new Set();
   renderAprobadas();
