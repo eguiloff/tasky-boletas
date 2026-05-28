@@ -2693,15 +2693,15 @@ function openModProv(rut, nombre, onSaved){
     '<div style="font-size:16px;font-weight:700;color:#0F172A;margin-bottom:4px;">Datos bancarios</div>'+
     '<div style="font-size:12px;color:#64748B;margin-bottom:20px;">'+p.nombre+'</div>'+
     '<div style="margin-bottom:14px;"><label style="font-size:11px;font-weight:600;color:#475569;text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:6px;">Banco</label>'+
-    '<select id="mpBanco" style="width:100%;background:#F8F9FC;border:1.5px solid #E8ECF4;border-radius:8px;padding:9px 12px;font-size:13px;color:#0F172A;font-family:Poppins,sans-serif;">'+
+    '<select id="apBanco" style="width:100%;background:#F8F9FC;border:1.5px solid #E8ECF4;border-radius:8px;padding:9px 12px;font-size:13px;color:#0F172A;font-family:Poppins,sans-serif;">'+
     BANCOS_LIST.map(function(b){return '<option value="'+b+'"'+(b===p.banco?' selected':'')+'>'+b+'</option>';}).join('')+
     '</select></div>'+
     '<div style="margin-bottom:14px;"><label style="font-size:11px;font-weight:600;color:#475569;text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:6px;">Tipo de cuenta</label>'+
-    '<select id="mpTipo" style="width:100%;background:#F8F9FC;border:1.5px solid #E8ECF4;border-radius:8px;padding:9px 12px;font-size:13px;color:#0F172A;font-family:Poppins,sans-serif;">'+
+    '<select id="apTipo" style="width:100%;background:#F8F9FC;border:1.5px solid #E8ECF4;border-radius:8px;padding:9px 12px;font-size:13px;color:#0F172A;font-family:Poppins,sans-serif;">'+
     TIPOS_LIST.map(function(t){return '<option value="'+t+'"'+(t===p.tipo_cuenta?' selected':'')+'>'+t+'</option>';}).join('')+
     '</select></div>'+
     '<div style="margin-bottom:22px;"><label style="font-size:11px;font-weight:600;color:#475569;text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:6px;">Número de cuenta</label>'+
-    '<input id="mpCuenta" value="'+(p.cuenta||p.n_cuenta||"")+'" placeholder="000123456789" style="width:100%;background:#F8F9FC;border:1.5px solid #E8ECF4;border-radius:8px;padding:9px 12px;font-size:13px;color:#0F172A;font-family:monospace;box-sizing:border-box;"></div>'+
+    '<input id="apCuenta" value="'+(p.cuenta||p.n_cuenta||"")+'" placeholder="000123456789" style="width:100%;background:#F8F9FC;border:1.5px solid #E8ECF4;border-radius:8px;padding:9px 12px;font-size:13px;color:#0F172A;font-family:monospace;box-sizing:border-box;"></div>'+
     '<div style="display:flex;gap:8px;">'+
     '<button id="btnGuardarBanco" data-rut="'+rut+'" style="flex:1;padding:11px 0;border-radius:9px;background:linear-gradient(135deg,#6B5CE7,#5548C8);color:#fff;font-weight:700;font-size:13px;border:none;cursor:pointer;font-family:Poppins,sans-serif;">Guardar</button>'+
     '<button id="btnCancelBanco" style="padding:11px 16px;border-radius:9px;background:#F8F9FC;border:1.5px solid #E8ECF4;color:#475569;font-weight:600;font-size:13px;cursor:pointer;font-family:Poppins,sans-serif;">Cancelar</button>'+
@@ -2717,9 +2717,9 @@ function openModProv(rut, nombre, onSaved){
   mod._onSaved=onSaved;
 }
 function guardarBancoApro(rut){
-  var banco=document.getElementById("mpBanco").value;
-  var tipo=document.getElementById("mpTipo").value;
-  var cuenta=document.getElementById("mpCuenta").value.trim();
+  var banco=document.getElementById("apBanco").value;
+  var tipo=document.getElementById("apTipo").value;
+  var cuenta=document.getElementById("apCuenta").value.trim();
   if(!banco||!cuenta){toast("Completa banco y número de cuenta");return;}
   // Update or create proveedor
   var found=false;
