@@ -2345,7 +2345,8 @@ function buildNomina(selBoletas){
   // Mark boletas as En Nomina so they leave Aprobadas
   selBoletas.forEach(function(b){
     b.data.nomina=num;
-    b.data.aprobada=false;
+    // Keep aprobada=true so getEstadoDisplay shows "En Nomina" not "Pendiente"
+    b.data.aprobada=true;
   });
   clearSel();save();
   filtA();kpiApro();updNavBadges();
@@ -2538,6 +2539,8 @@ function filtA(){
   var mes=document.getElementById("fAMes")?document.getElementById("fAMes").value:"";
   fDataA=DATA.filter(function(r){
     if(!r.aprobada||r.nombre==="nan")return false;
+    if(r.nomina)return false; // already in a nomina
+    if(r.pagado==="Si")return false; // already paid
     if(q&&(r.nombre+r.rut+r.empresa+r.boleta).toLowerCase().indexOf(q)<0)return false;
     if(em&&r.empresa!==em)return false;
     if(ct&&r.categoria!==ct)return false;
