@@ -1268,15 +1268,19 @@ function normFechaMes(fecha){
   var d=fecha.trim();
   var m4=d.match(/(\d{4})-(\d{2})-(\d{2})/);
   var m2=d.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
-  if(m4)return m4[1]+"-"+(m4[2].length<2?"0":"")+m4[2];
-  if(m2)return m2[3]+"-"+(parseInt(m2[2])<10?"0":"")+m2[2];
+  if(m4)return m4[1]+"-"+m4[2].slice(0,2);
+  if(m2){var mo2=(parseInt(m2[2])<10?"0":"")+parseInt(m2[2]);return m2[3]+"-"+mo2;}
   return "";
 }
 function kpi(){
-  var mes=document.getElementById("fMes")?document.getElementById("fMes").value:"";
+  var mesSel=document.getElementById("fMes");
+  var mes=mesSel?mesSel.value:"";
   var v=DATA.filter(function(r){
     if(r.estado=="ANUL"||r.pagado==="Anulada")return false;
-    if(mes&&normFechaMes(r.fecha)!==mes)return false;
+    if(mes){
+      var rf=normFechaMes(r.fecha);
+      if(!rf||rf!==mes)return false;
+    }
     return true;
   });
   var p=v.filter(function(r){return r.pagado=="Si";});
