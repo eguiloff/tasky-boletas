@@ -2616,16 +2616,18 @@ function toggleSelA(cb,id){if(cb.checked)selA.add(String(id));else selA.delete(S
 function clearSelA(){selA=new Set();renderAprobadas();}
 function togAllA(cb){
   if(cb.checked){
-    // Select ALL aprobadas with bank data, not just current page
+    // Select ALL aprobadas — skip only those confirmed to have NO bank data
     var allApro=DATA.filter(function(r){return r.aprobada&&r.nombre&&r.nombre!=="nan";});
-    console.log("Total aprobadas:",allApro.length,"fDataA:",fDataA.length);
     allApro.forEach(function(r){
       var prov2=findProveedor(r.rut);
+      // Try both normalized and raw RUT match
+      if(!prov2){
+        var normR=normalizeRut(r.rut);
+        prov2=PROVEEDORES.find(function(p){return normalizeRut(p.rut)===normR;});
+      }
       var hasBanco=!!(prov2&&prov2.banco&&(prov2.cuenta||prov2.n_cuenta));
-      console.log(r.nombre,r.rut,"banco:",prov2&&prov2.banco,"cuenta:",prov2&&(prov2.cuenta||prov2.n_cuenta),"hasBanco:",hasBanco);
       if(hasBanco)selA.add(String(r.id||r.boleta+r.rut));
     });
-    console.log("Selected:",selA.size);
   } else selA=new Set();
   renderAprobadas();
 }
