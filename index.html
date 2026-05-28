@@ -843,7 +843,7 @@ var SHEET_BOLETAS="Boletas";
 var SHEET_EMPRESAS="Empresas";
 var HEADERS_BOLETAS=["id","boleta","estado","fecha","rut","nombre","bruto","retencion","liquido","empresa","activacion","fechaPago","pagado","empresaPago","nomina","categoria","aprobada","fechaAprobacion"];
 var HEADERS_EMPRESAS=["id","nombre","categoria","contacto"];
-var HEADERS_PROVEEDORES=["rut","nombre","codBanco","banco","cuenta","tipo","email"];
+var HEADERS_PROVEEDORES=["rut","nombre","codBanco","banco","cuenta","n_cuenta","tipo","tipo_cuenta","email"];
 var HEADERS_NOMINAS=["id","numero","fecha","estado","total","boletas","items"];
 var HEADERS_FACTURAS=["id","numero","cliente","rutCliente","fecha","monto","neto","iva","descripcion","estado","boletasVinculadas"];
 var SHEET_FACTURAS="Facturas";
@@ -2095,12 +2095,12 @@ function normalizeRut(rut){
 }
 
 function findProveedor(rut){
+  if(!rut)return null;
   var r=normalizeRut(rut);
-  // Also try matching last digit as DV
   return PROVEEDORES.find(function(p){
+    if(!p.rut)return false;
     var pr=normalizeRut(p.rut);
-    return pr===r || 
-           pr.replace(/[^0-9kK]/gi,"")===r.replace(/[^0-9kK]/gi,"");
+    return pr===r||pr.replace(/[^0-9kK]/gi,"")===r.replace(/[^0-9kK]/gi,"");
   })||null;
 }
 
@@ -2229,11 +2229,15 @@ function exportProveedores(){
 // Auto-add taskers from DATA to PROVEEDORES if not exist
 function syncProveedoresFromData(){
   var added=0;
+  var seen={};
   DATA.forEach(function(r){
     if(!r.rut)return;
-    var existing=findProveedor(r.rut);
+    var nrut=normalizeRut(r.rut);
+    if(seen[nrut])return;
+    seen[nrut]=true;
+    var existing=PROVEEDORES.find(function(p){return normalizeRut(p.rut)===nrut;});
     if(!existing){
-      PROVEEDORES.push({rut:normalizeRut(r.rut),nombre:r.nombre,codBanco:"",banco:"",cuenta:"",tipo:"Vista",email:""});
+      PROVEEDORES.push({rut:nrut,nombre:r.nombre,codBanco:"",banco:"",cuenta:"",n_cuenta:"",tipo:"Vista",tipo_cuenta:"Vista",email:""});
       added++;
     }
   });
@@ -2782,7 +2786,7 @@ function guardarBancoApro(rut){
       p.banco=banco;p.codBanco=codBanco;
       p.cuenta=cuenta;p.n_cuenta=cuenta;
       p.tipo=tipo;p.tipo_cuenta=tipo;
-      if(email)p.email=email;
+      p.email=email||p.email||"";
       found=true;
     }
   });
