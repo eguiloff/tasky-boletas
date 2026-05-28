@@ -2563,7 +2563,7 @@ function filtA(){
   pgA=1;renderAprobadas();kpiApro();
 }
 function kpiApro(){
-  var apro=DATA.filter(function(r){return r.aprobada;});
+  var apro=DATA.filter(function(r){return r.aprobada&&!r.nomina&&r.pagado!=="Si";});
   var sinDatos=apro.filter(function(r){var p=findProveedor(r.rut);return !p||!p.banco||(!p.cuenta&&!p.n_cuenta);});
   var tot=apro.reduce(function(s,r){return s+(r.liquido||0);},0);
   var el;
