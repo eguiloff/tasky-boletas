@@ -2570,7 +2570,7 @@ function renderAprobadas(){
   if(empty)empty.style.display="none";
   var rows=page.map(function(r){
     var idx2=DATA.indexOf(r);
-    var rid=String(r.id||idx2);
+    var rid="idx_"+idx2;
     var s=selA.has(rid);
     var prov2=findProveedor(r.rut);
     var hasBanco=!!(prov2&&prov2.banco&&(prov2.cuenta||prov2.n_cuenta));
@@ -2611,13 +2611,13 @@ function renderAprobadas(){
   var bct=document.getElementById("bctA");
   if(bct)bct.textContent=selA.size+" seleccionadas";
   var cbAA=document.getElementById("cbAA");
-  if(cbAA)cbAA.checked=fDataA.length>0&&fDataA.every(function(r){return selA.has(String(r.id||DATA.indexOf(r)));});
+  if(cbAA)cbAA.checked=fDataA.length>0&&fDataA.every(function(r){var p2=findProveedor(r.rut);var hb=!!(p2&&p2.banco&&(p2.cuenta||p2.n_cuenta));return !hb||selA.has("idx_"+DATA.indexOf(r));});
 }
 function toggleSelA(cb,id){if(cb.checked)selA.add(String(id));else selA.delete(String(id));renderAprobadas();}
 function clearSelA(){selA=new Set();renderAprobadas();}
 function togAllA(cb){
   if(cb.checked){
-    // Select ALL aprobadas with bank data using DATA index as unique key
+    // Use DATA index as unique key — r.id can have duplicates
     DATA.forEach(function(r,i){
       if(!r.aprobada||!r.nombre||r.nombre==="nan")return;
       var prov2=findProveedor(r.rut);
@@ -2626,7 +2626,7 @@ function togAllA(cb){
         prov2=PROVEEDORES.find(function(p){return normalizeRut(p.rut)===normR;});
       }
       var hasBanco=!!(prov2&&prov2.banco&&(prov2.cuenta||prov2.n_cuenta));
-      if(hasBanco)selA.add(String(r.id||i));
+      if(hasBanco)selA.add("idx_"+i);
     });
   } else selA=new Set();
   renderAprobadas();
@@ -2668,10 +2668,9 @@ function aprobarSel(){
 function desaprobarSel(){
   if(selA.size===0){toast("Selecciona boletas primero");return;}
   var count=0;
-  var selArr=Array.from(selA).map(String);
-  DATA.forEach(function(r){
-    var rid=String(r.id||r.boleta+r.rut);
-    if(selArr.indexOf(rid)>=0){
+  DATA.forEach(function(r,i){
+    if(!selA.has("idx_"+i))return;
+    {
       r.aprobada=false;
       delete r.fechaAprobacion;
       count++;
@@ -2783,8 +2782,8 @@ function crearNominaApro(){
   var selIds=Array.from(selA);
   if(selIds.length===0){toast("Selecciona boletas aprobadas primero");return;}
   sel=new Set();
-  DATA.forEach(function(r){
-    if(selIds.indexOf(r.id||r.boleta+r.rut)>=0)sel.add(r.id);
+  DATA.forEach(function(r,i){
+    if(selIds.indexOf("idx_"+i)>=0)sel.add(r.id||i);
   });
   clearSelA();
   crearNomina();
