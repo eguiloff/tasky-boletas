@@ -897,7 +897,7 @@ function toggleDocGroup(){
 }
 function updNavBadges(){
   var pend=DATA.filter(function(r){return r.nombre&&r.nombre!=="nan"&&!r.aprobada&&r.pagado!=="Si"&&r.pagado!=="Anulada"&&!r.nomina;}).length;
-  var apro=DATA.filter(function(r){return r.aprobada;}).length;
+  var apro=DATA.filter(function(r){return r.aprobada&&!r.nomina&&r.pagado!=="Si";}).length;
   var nom=NOMINAS?NOMINAS.length:0;
   var tot=DATA.filter(function(r){return r.nombre&&r.nombre!=="nan";}).length;
   var el;
