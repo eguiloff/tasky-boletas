@@ -1097,11 +1097,9 @@ function saveToSheets(){
     var rows=DATA.map(function(r){
       return HEADERS_BOLETAS.map(function(h){return r[h]!==undefined?r[h]:"";});
     });
-    sheetsReq("DELETE","/values/"+encodeURIComponent(SHEET_BOLETAS+"!A2:Z")+":clear",{},function(){
-      var next=function(){saveEmpresas();};
-      if(!rows.length){next();return;}
-      sheetsReq("PUT","/values/"+encodeURIComponent(SHEET_BOLETAS+"!A2")+"?valueInputOption=RAW",{values:rows},next);
-    });
+    var next=function(){saveEmpresas();};
+    if(!rows.length){next();return;}
+    sheetsReq("PUT","/values/"+encodeURIComponent(SHEET_BOLETAS+"!A1")+"?valueInputOption=RAW",{values:[HEADERS_BOLETAS].concat(rows)},next);
   });
 }
 
@@ -1110,11 +1108,9 @@ function saveEmpresas(){
     var rows=EMPRESAS.map(function(e){
       return HEADERS_EMPRESAS.map(function(h){return e[h]!==undefined?e[h]:"";});
     });
-    sheetsReq("DELETE","/values/"+encodeURIComponent(SHEET_EMPRESAS+"!A2:Z")+":clear",{},function(){
-      var next=function(){saveProveedoresSheet();};
-      if(!rows.length){next();return;}
-      sheetsReq("PUT","/values/"+encodeURIComponent(SHEET_EMPRESAS+"!A2")+"?valueInputOption=RAW",{values:rows},next);
-    });
+    var next=function(){saveProveedoresSheet();};
+    if(!rows.length){next();return;}
+    sheetsReq("PUT","/values/"+encodeURIComponent(SHEET_EMPRESAS+"!A1")+"?valueInputOption=RAW",{values:[HEADERS_EMPRESAS].concat(rows)},next);
   });
 }
 
@@ -1123,11 +1119,9 @@ function saveProveedoresSheet(){
     var rows=PROVEEDORES.map(function(p){
       return HEADERS_PROVEEDORES.map(function(h){return p[h]!==undefined?p[h]:"";});
     });
-    sheetsReq("DELETE","/values/"+encodeURIComponent(SHEET_PROVEEDORES+"!A2:Z")+":clear",{},function(){
-      var next=function(){saveNominasSheet();};
-      if(!rows.length){next();return;}
-      sheetsReq("PUT","/values/"+encodeURIComponent(SHEET_PROVEEDORES+"!A2")+"?valueInputOption=RAW",{values:rows},next);
-    });
+    var next=function(){saveNominasSheet();};
+    if(!rows.length){next();return;}
+    sheetsReq("PUT","/values/"+encodeURIComponent(SHEET_PROVEEDORES+"!A1")+"?valueInputOption=RAW",{values:[HEADERS_PROVEEDORES].concat(rows)},next);
   });
 }
 
@@ -1150,11 +1144,9 @@ function saveNominasSheet(){
       return [n.id,n.numero,n.fecha,n.estado,n.total,
               JSON.stringify(n.boletas),JSON.stringify(n.items)];
     });
-    sheetsReq("DELETE","/values/"+encodeURIComponent(SHEET_NOMINAS+"!A2:Z")+":clear",{},function(){
-      if(!rows.length){saveFacturasSheet();return;}
-      sheetsReq("PUT","/values/"+encodeURIComponent(SHEET_NOMINAS+"!A2")+"?valueInputOption=RAW",
-        {values:rows},function(){saveFacturasSheet();});
-    });
+    if(!rows.length){saveFacturasSheet();return;}
+    sheetsReq("PUT","/values/"+encodeURIComponent(SHEET_NOMINAS+"!A1")+"?valueInputOption=RAW",
+      {values:[HEADERS_NOMINAS].concat(rows)},function(){saveFacturasSheet();});
   });
 }
 
