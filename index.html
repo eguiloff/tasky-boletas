@@ -897,7 +897,7 @@ function toggleDocGroup(){
 }
 function updNavBadges(){
   var pend=DATA.filter(function(r){return r.nombre&&r.nombre!=="nan"&&!r.aprobada&&r.pagado!=="Si"&&r.pagado!=="Anulada"&&!r.nomina;}).length;
-  var apro=DATA.filter(function(r){return r.aprobada&&!r.nomina&&r.pagado!=="Si";}).length;
+  var apro=DATA.filter(function(r){return r.aprobada&&!r.nomina&&r.pagado!=="Si"&&r.pagado!=="Anulada"&&r.estado!=="ANUL";}).length;
   var nom=NOMINAS?NOMINAS.length:0;
   var tot=DATA.filter(function(r){return r.nombre&&r.nombre!=="nan";}).length;
   var el;
@@ -2566,9 +2566,10 @@ function filtA(){
   var ct=document.getElementById("fAC")?document.getElementById("fAC").value:"";
   var mes=document.getElementById("fAMes")?document.getElementById("fAMes").value:"";
   fDataA=DATA.filter(function(r){
-    if(!r.aprobada||r.nombre==="nan")return false;
+    if(!r.aprobada||!r.nombre||r.nombre==="nan")return false;
     if(r.nomina)return false; // already in a nomina
     if(r.pagado==="Si")return false; // already paid
+    if(r.pagado==="Anulada"||r.estado==="ANUL")return false; // anulada
     if(q&&(r.nombre+r.rut+r.empresa+r.boleta).toLowerCase().indexOf(q)<0)return false;
     if(em&&r.empresa!==em)return false;
     if(ct&&r.categoria!==ct)return false;
@@ -2587,7 +2588,7 @@ function filtA(){
   pgA=1;renderAprobadas();kpiApro();updNavBadges();
 }
 function kpiApro(){
-  var apro=DATA.filter(function(r){return r.aprobada&&!r.nomina&&r.pagado!=="Si";});
+  var apro=DATA.filter(function(r){return r.aprobada&&!r.nomina&&r.pagado!=="Si"&&r.pagado!=="Anulada"&&r.estado!=="ANUL";});
   var sinDatos=apro.filter(function(r){var p=findProveedor(r.rut);return !p||!p.banco||(!p.cuenta&&!p.n_cuenta);});
   var tot=apro.reduce(function(s,r){return s+(r.liquido||0);},0);
   var el;
