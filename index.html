@@ -2684,7 +2684,33 @@ function openModProv(rut, nombre, onSaved){
   var existMod=document.getElementById("modProvApro");
   if(existMod)existMod.remove();
   var p=findProveedor(rut)||{rut:rut,nombre:nombre||rut,banco:"",n_cuenta:"",tipo_cuenta:"Cuenta Corriente"};
-  var BANCOS_LIST=["Banco de Chile","Banco Estado","Santander","BCI","Banco BICE","Banco Falabella","Banco Security","Scotiabank","Banco Itaú","Mercado Pago","Otro"];
+  var BANCOS_LIST=[
+    {c:"001",n:"Banco de Chile"},
+    {c:"009",n:"Banco Internacional"},
+    {c:"012",n:"Banco Estado"},
+    {c:"014",n:"Scotiabank"},
+    {c:"016",n:"BCI"},
+    {c:"017",n:"Banco de Crédito e Inversiones (BCI)"},
+    {c:"024",n:"Banco BICE"},
+    {c:"028",n:"Banco Itaú"},
+    {c:"031",n:"Banco Santander"},
+    {c:"037",n:"Banco Santander Banefe"},
+    {c:"039",n:"Itaú Corpbanca"},
+    {c:"049",n:"Banco Security"},
+    {c:"051",n:"Banco Falabella"},
+    {c:"053",n:"Banco Ripley"},
+    {c:"055",n:"Banco Consorcio"},
+    {c:"059",n:"Banco BTG Pactual"},
+    {c:"504",n:"Banco Bilbao Vizcaya (BBVA)"},
+    {c:"672",n:"Banco Coopeuch"},
+    {c:"730",n:"Tenpo"},
+    {c:"706",n:"Banco del Desarrollo"},
+    {c:"812",n:"Prepago Los Héroes"},
+    {c:"825",n:"MACH"},
+    {c:"874",n:"Mercado Pago"},
+    {c:"875",n:"BICE Digital"},
+    {c:"000",n:"Otro"}
+  ];
   var TIPOS_LIST=["Cuenta Corriente","Cuenta Vista","Cuenta de Ahorro","Cuenta RUT"];
   var mod=document.createElement("div");
   mod.id="modProvApro";
@@ -2694,7 +2720,7 @@ function openModProv(rut, nombre, onSaved){
     '<div style="font-size:12px;color:#64748B;margin-bottom:20px;">'+p.nombre+'</div>'+
     '<div style="margin-bottom:14px;"><label style="font-size:11px;font-weight:600;color:#475569;text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:6px;">Banco</label>'+
     '<select id="apBanco" style="width:100%;background:#F8F9FC;border:1.5px solid #E8ECF4;border-radius:8px;padding:9px 12px;font-size:13px;color:#0F172A;font-family:Poppins,sans-serif;">'+
-    BANCOS_LIST.map(function(b){return '<option value="'+b+'"'+(b===p.banco?' selected':'')+'>'+b+'</option>';}).join('')+
+    BANCOS_LIST.map(function(b){return '<option value="'+b.n+'" data-cod="'+b.c+'"'+(b.n===p.banco?' selected':'')+'>'+b.c+' - '+b.n+'</option>';}).join('')+
     '</select></div>'+
     '<div style="margin-bottom:14px;"><label style="font-size:11px;font-weight:600;color:#475569;text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:6px;">Tipo de cuenta</label>'+
     '<select id="apTipo" style="width:100%;background:#F8F9FC;border:1.5px solid #E8ECF4;border-radius:8px;padding:9px 12px;font-size:13px;color:#0F172A;font-family:Poppins,sans-serif;">'+
