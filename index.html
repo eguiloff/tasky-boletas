@@ -2283,7 +2283,8 @@ function crearNomina(){
   var conDatos=[];
   selBoletas.forEach(function(b){
     var p=findProveedor(b.data.rut);
-    if(!p||!p.cuenta||!p.banco) sinDatos.push(b);
+    var tieneCuenta=p&&p.banco&&(p.cuenta||p.n_cuenta);
+    if(!tieneCuenta) sinDatos.push(b);
     else conDatos.push(b);
   });
   if(sinDatos.length&&!conDatos.length){
@@ -2335,7 +2336,7 @@ function buildNomina(selBoletas){
         nombre:b.data.nombre,
         boleta:b.data.boleta,
         liquido:b.data.liquido,
-        banco:p.banco,codBanco:p.codBanco,cuenta:p.cuenta,tipo:p.tipo,email:p.email
+        banco:p.banco,codBanco:p.codBanco,cuenta:p.cuenta||p.n_cuenta||"",tipo:p.tipo||p.tipo_cuenta||"",email:p.email||""
       };
     }),
     total:selBoletas.reduce(function(s,b){return s+(b.data.liquido||0);},0)
