@@ -1263,10 +1263,24 @@ function loadFromLocal(){
 }
 
 // ── KPI ──────────────────────────────────────────────────────
+function normFechaMes(fecha){
+  if(!fecha)return "";
+  var d=fecha.trim();
+  var m4=d.match(/(\d{4})-(\d{2})-(\d{2})/);
+  var m2=d.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if(m4)return m4[1]+"-"+(m4[2].length<2?"0":"")+m4[2];
+  if(m2)return m2[3]+"-"+(parseInt(m2[2])<10?"0":"")+m2[2];
+  return "";
+}
 function kpi(){
-  var v=DATA.filter(function(r){return r.estado!="ANUL"&&r.pagado!=="Anulada";});
+  var mes=document.getElementById("fMes")?document.getElementById("fMes").value:"";
+  var v=DATA.filter(function(r){
+    if(r.estado=="ANUL"||r.pagado==="Anulada")return false;
+    if(mes&&normFechaMes(r.fecha)!==mes)return false;
+    return true;
+  });
   var p=v.filter(function(r){return r.pagado=="Si";});
-  // Pendientes = not paid, not approved, not in nomina
+  // Pendientes = not paid, not approved
   var pd=v.filter(function(r){return r.pagado!="Si"&&!r.aprobada;});
   var pp=pd.reduce(function(s,r){return s+(r.liquido||0);},0);
   var tp=p.reduce(function(s,r){return s+(r.liquido||0);},0);
