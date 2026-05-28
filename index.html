@@ -2720,15 +2720,17 @@ function guardarBancoApro(rut){
   var banco=document.getElementById("apBanco").value;
   var tipo=document.getElementById("apTipo").value;
   var cuenta=document.getElementById("apCuenta").value.trim();
+  var email=(document.getElementById("apEmail")||{}).value||"";
+  email=email.trim();
   if(!banco||!cuenta){toast("Completa banco y número de cuenta");return;}
   // Update or create proveedor
   var found=false;
   PROVEEDORES.forEach(function(p){
-    if(normalizeRut(p.rut)===normalizeRut(rut)){p.banco=banco;p.cuenta=cuenta;p.n_cuenta=cuenta;p.tipo=tipo;p.tipo_cuenta=tipo;found=true;}
+    if(normalizeRut(p.rut)===normalizeRut(rut)){p.banco=banco;p.cuenta=cuenta;p.n_cuenta=cuenta;p.tipo=tipo;p.tipo_cuenta=tipo;if(email)p.email=email;found=true;}
   });
   if(!found){
     var r=DATA.find(function(d){return d.rut===rut;});
-    PROVEEDORES.push({rut:rut,nombre:r?r.nombre:rut,banco:banco,cuenta:cuenta,n_cuenta:cuenta,tipo:tipo,tipo_cuenta:tipo,email:""});
+    PROVEEDORES.push({rut:rut,nombre:r?r.nombre:rut,banco:banco,cuenta:cuenta,n_cuenta:cuenta,tipo:tipo,tipo_cuenta:tipo,email:email});
   }
   save();
   var mod=document.getElementById("modProvApro");
@@ -2996,6 +2998,8 @@ function renderFacturacion(){
         '</div>'+
         '<div style="flex:1">'+
           '<div style="font-size:14px;font-weight:700;color:var(--t)">Factura N° '+f.numero+'</div>'+
+    '<div style="margin-bottom:22px"><label style="font-size:11px;font-weight:600;color:#475569;text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:6px">Email</label>'+
+    '<input id="apEmail" value="'+(p.email||"")+'" placeholder="correo@ejemplo.com" style="width:100%;background:#F8F9FC;border:1.5px solid #E8ECF4;border-radius:8px;padding:9px 12px;font-size:13px;color:#0F172A;font-family:Poppins,sans-serif;box-sizing:border-box;"></div>'+
           '<div style="font-size:12px;color:var(--t3);margin-top:2px">'+f.cliente+' · '+f.fecha+'</div>'+
         '</div>'+
         '<div style="text-align:right;margin-right:12px">'+
