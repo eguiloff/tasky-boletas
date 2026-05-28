@@ -1273,25 +1273,23 @@ function normFechaMes(fecha){
   return "";
 }
 function kpi(){
+  var mes="";
   var mesSel=document.getElementById("fMes");
-  var mes=mesSel?mesSel.value:"";
+  if(mesSel)mes=mesSel.value||"";
   var v=DATA.filter(function(r){
-    if(r.estado=="ANUL"||r.pagado==="Anulada")return false;
-    if(mes){
-      var rf=normFechaMes(r.fecha);
-      if(!rf||rf!==mes)return false;
-    }
+    if(!r.nombre||r.nombre==="nan")return false;
+    if(r.estado==="ANUL"||r.pagado==="Anulada")return false;
+    if(mes&&normFechaMes(r.fecha)!==mes)return false;
     return true;
   });
-  var p=v.filter(function(r){return r.pagado=="Si";});
-  // Pendientes = not paid, not approved
-  var pd=v.filter(function(r){return r.pagado!="Si"&&!r.aprobada;});
+  var p=v.filter(function(r){return r.pagado==="Si";});
+  var pd=v.filter(function(r){return r.pagado!=="Si"&&!r.aprobada;});
   var pp=pd.reduce(function(s,r){return s+(r.liquido||0);},0);
   var tp=p.reduce(function(s,r){return s+(r.liquido||0);},0);
-  document.getElementById("kP").textContent=fmt(pp);
-  document.getElementById("kV").textContent=fmt(tp);
-  document.getElementById("kPg").textContent=p.length;
-  document.getElementById("kPd").textContent=pd.length;
+  var kpEl=document.getElementById("kP");if(kpEl)kpEl.textContent=fmt(pp);
+  var kvEl=document.getElementById("kV");if(kvEl)kvEl.textContent=fmt(tp);
+  var kpgEl=document.getElementById("kPg");if(kpgEl)kpgEl.textContent=p.length;
+  var kpdEl=document.getElementById("kPd");if(kpdEl)kpdEl.textContent=pd.length;
   updNavBadges();
 }
 
