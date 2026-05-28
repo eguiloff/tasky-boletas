@@ -327,7 +327,7 @@ input[type=checkbox]{accent-color:var(--p);cursor:pointer;width:14px;height:14px
             <select id="fP" onchange="filt()"><option value="">Estado tasker</option><option value="Si">✓ Pagado</option><option value="Pendiente">⏳ Pendiente</option><option value="Anulada">✕ Anulada</option></select>
             <select id="fEP" onchange="filt()"><option value="">Empresa pagó</option><option value="Si">✓ Sí pagó</option><option value="Pendiente">⏳ Pendiente</option></select>
             <select id="fC" onchange="filt()"><option value="">Categoría</option><option value="B2B">B2B</option><option value="B2C">B2C</option><option value="Rendiciones">Rendiciones</option></select>
-            <select id="fMes" onchange="filt()"><option value="">Todos los meses</option></select>
+            <select id="fMes" onchange="filt();kpi()"><option value="">Todos los meses</option></select>
             <div style="margin-left:auto;display:flex;gap:7px">
               <label class="tk" for="fi">↑ Subir CSV/Excel</label>
               <input type="file" id="fi" accept=".csv,.xlsx,.xls" style="display:none" onchange="importF(this)">
