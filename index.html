@@ -210,10 +210,12 @@ input[type=checkbox]{accent-color:var(--p);cursor:pointer;width:14px;height:14px
       <span>tasky</span>
     </div>
     <div class="at">Administrador de Boletas</div>
-    <div class="as">Ingresa tu nombre para acceder. Los datos se guardan automáticamente en este navegador.</div>
-    <input type="text" id="ni" class="ni" placeholder="Tu nombre" onkeydown="if(event.key==='Enter')signIn()">
+    <div class="as">Acceso exclusivo para el equipo Tasky.</div>
+    <input type="text" id="ni" class="ni" placeholder="Tu nombre" onkeydown="if(event.key==='Enter')signIn()" style="margin-bottom:8px">
+    <input type="email" id="niEmail" class="ni" placeholder="correo@tasky.cl" onkeydown="if(event.key==='Enter')signIn()" style="margin-bottom:0">
+    <div id="loginErr" style="color:#DC2626;font-size:12px;margin-top:6px;display:none">Solo se permite acceso con correo @tasky.cl</div>
     <button class="bm" onclick="signIn()">Ingresar al sistema →</button>
-    <p class="an">Datos guardados localmente en tu navegador</p>
+    <p class="an">Acceso restringido al equipo Tasky</p>
   </div>
 </div>
 
@@ -908,9 +910,24 @@ function updNavBadges(){
 
 // ── AUTH ─────────────────────────────────────────────────────
 function signIn(){
-  var nombre=document.getElementById("ni").value.trim()||"Administrador";
+  var nombre=document.getElementById("ni").value.trim();
+  var email=(document.getElementById("niEmail")||{}).value||"";
+  email=email.trim().toLowerCase();
+  var errEl=document.getElementById("loginErr");
+  // Validate name
   if(!nombre){document.getElementById("ni").focus();return;}
+  // Validate email domain
+  if(!email){
+    if(errEl){errEl.textContent="Ingresa tu correo @tasky.cl";errEl.style.display="block";}
+    document.getElementById("niEmail").focus();return;
+  }
+  if(!email.endsWith("@tasky.cl")){
+    if(errEl){errEl.textContent="Solo se permite acceso con correo @tasky.cl";errEl.style.display="block";}
+    document.getElementById("niEmail").focus();return;
+  }
+  if(errEl)errEl.style.display="none";
   localStorage.setItem("tk_u",nombre);
+  localStorage.setItem("tk_email",email);
   // Enter immediately, connect Google in background
   onIn(nombre);
   // Try Google auth after entering
@@ -948,7 +965,14 @@ function onIn(n){
 
 function tryAutoLogin(){
   var savedUser=localStorage.getItem("tk_u");
+  var savedEmail=localStorage.getItem("tk_email")||"";
   if(!savedUser)return;
+  // Validate saved email
+  if(!savedEmail.endsWith("@tasky.cl")){
+    localStorage.removeItem("tk_u");
+    localStorage.removeItem("tk_email");
+    return;
+  }
   // Enter app immediately with cached data
   var savedToken=localStorage.getItem("tk_gtoken");
   if(savedToken){gToken=savedToken;}
@@ -956,10 +980,7 @@ function tryAutoLogin(){
   // Then silently refresh token in background
   setTimeout(function(){
     autoRefreshToken(function(ok){
-      if(ok){
-        // Token renewed — reload fresh data from Sheets
-        loadD();
-      }
+      if(ok){loadD();}
     });
   }, 500);
 }
