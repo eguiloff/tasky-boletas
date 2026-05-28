@@ -2612,11 +2612,16 @@ function renderAprobadas(){
   var cbAA=document.getElementById("cbAA");
   if(cbAA)cbAA.checked=fDataA.length>0&&fDataA.every(function(r){return selA.has(r.id||r.boleta+r.rut);});
 }
-function toggleSelA(cb,id){if(cb.checked)selA.add(id);else selA.delete(id);renderAprobadas();}
+function toggleSelA(cb,id){if(cb.checked)selA.add(String(id));else selA.delete(String(id));renderAprobadas();}
 function clearSelA(){selA=new Set();renderAprobadas();}
 function togAllA(cb){
-  if(cb.checked)fDataA.forEach(function(r){selA.add(r.id||r.boleta+r.rut);});
-  else selA=new Set();
+  if(cb.checked){
+    fDataA.forEach(function(r){
+      var prov2=findProveedor(r.rut);
+      var hasBanco=!!(prov2&&prov2.banco&&(prov2.cuenta||prov2.n_cuenta));
+      if(hasBanco)selA.add(String(r.id||r.boleta+r.rut));
+    });
+  } else selA=new Set();
   renderAprobadas();
 }
 function aprobarSel(){
