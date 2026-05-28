@@ -2781,12 +2781,16 @@ function guardarBancoApro(rut){
 function crearNominaApro(){
   var selIds=Array.from(selA);
   if(selIds.length===0){toast("Selecciona boletas aprobadas primero");return;}
-  sel=new Set();
+  // Build selBoletas directly with idx_ keys
+  var selBoletas=[];
   DATA.forEach(function(r,i){
-    if(selIds.indexOf("idx_"+i)>=0)sel.add(r.id||i);
+    if(selIds.indexOf("idx_"+i)<0)return;
+    if(r.estado==="ANUL"||r.pagado==="Anulada")return;
+    selBoletas.push({data:r,idx:i});
   });
+  if(!selBoletas.length){toast("No hay boletas válidas seleccionadas");return;}
   clearSelA();
-  crearNomina();
+  buildNomina(selBoletas);
 }
 
 // ── TODAS ─────────────────────────────────────────────────────
