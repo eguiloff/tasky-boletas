@@ -2330,13 +2330,13 @@ function buildNomina(selBoletas){
     estado:"Pendiente",
     boletas:selBoletas.map(function(b){return b.data.id;}),
     items:selBoletas.map(function(b){
-      var p=findProveedor(b.data.rut);
+      var p=findProveedor(b.data.rut)||{};
       return {
         rut:normalizeRut(b.data.rut),
         nombre:b.data.nombre,
         boleta:b.data.boleta,
         liquido:b.data.liquido,
-        banco:p.banco,codBanco:p.codBanco,cuenta:p.cuenta||p.n_cuenta||"",tipo:p.tipo||p.tipo_cuenta||"",email:p.email||""
+        banco:p.banco||"",codBanco:p.codBanco||"",cuenta:p.cuenta||p.n_cuenta||"",tipo:p.tipo||p.tipo_cuenta||"",email:p.email||""
       };
     }),
     total:selBoletas.reduce(function(s,b){return s+(b.data.liquido||0);},0)
@@ -2790,7 +2790,12 @@ function crearNominaApro(){
   });
   if(!selBoletas.length){toast("No hay boletas válidas seleccionadas");return;}
   clearSelA();
-  buildNomina(selBoletas);
+  try{
+    buildNomina(selBoletas);
+  }catch(e){
+    console.error("buildNomina error:",e);
+    toast("Error al crear nómina: "+e.message);
+  }
 }
 
 // ── TODAS ─────────────────────────────────────────────────────
