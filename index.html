@@ -883,7 +883,7 @@ function showTab(name,btn){
   if(name==="metricas"){updMetMes();renderMetricas();}
   if(name==="proveedores")renderProveedores();
   if(name==="nominas")renderNominas();
-  if(name==="aprobadas"){updAproE();updAproMes();filtA();kpiApro();}
+  if(name==="aprobadas"){updAproE();updAproMes();filtA();kpiApro();updNavBadges();}
   if(name==="todas"){updTodasE();updTodasMes();filtT();kpiTodas();}
   if(name==="facturacion")renderFacturacion();
 }
@@ -2560,7 +2560,7 @@ function filtA(){
     }
     return true;
   });
-  pgA=1;renderAprobadas();kpiApro();
+  pgA=1;renderAprobadas();kpiApro();updNavBadges();
 }
 function kpiApro(){
   var apro=DATA.filter(function(r){return r.aprobada&&!r.nomina&&r.pagado!=="Si";});
