@@ -2342,7 +2342,13 @@ function buildNomina(selBoletas){
     total:selBoletas.reduce(function(s,b){return s+(b.data.liquido||0);},0)
   };
   NOMINAS.push(nomina);
+  // Mark boletas as En Nomina so they leave Aprobadas
+  selBoletas.forEach(function(b){
+    b.data.nomina=num;
+    b.data.aprobada=false;
+  });
   clearSel();save();
+  filtA();kpiApro();updNavBadges();
   showTab("nominas",document.getElementById("nav-nominas"));
   renderNominas();
   toast("Nómina "+num+" creada ✓");
