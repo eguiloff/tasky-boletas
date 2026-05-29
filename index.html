@@ -2587,6 +2587,7 @@ function filtA(){
   });
   pgA=1;renderAprobadas();kpiApro();updNavBadges();
 }
+function renderAprobadasPage(){renderAprobadas();}
 function kpiApro(){
   var apro=DATA.filter(function(r){return r.aprobada&&!r.nomina&&r.pagado!=="Si"&&r.pagado!=="Anulada"&&r.estado!=="ANUL";});
   var sinDatos=apro.filter(function(r){var p=findProveedor(r.rut);return !p||!p.banco||(!p.cuenta&&!p.n_cuenta);});
@@ -2643,7 +2644,7 @@ function renderAprobadas(){
     });
   });
   var tp=Math.ceil(fDataA.length/PPA);
-  if(pgr)pgr.innerHTML=tp>1?buildPgr(pgA,tp,"pgA","filtA"):"";
+  if(pgr)pgr.innerHTML=tp>1?buildPgr(pgA,tp,"pgA","renderAprobadas"):"";
   var bulk=document.getElementById("bulkA");
   if(bulk)bulk.style.display=selA.size>0?"flex":"none";
   var bct=document.getElementById("bctA");
