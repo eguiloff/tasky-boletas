@@ -2360,6 +2360,7 @@ function buildNomina(selBoletas){
         nombre:b.data.nombre,
         boleta:b.data.boleta,
         liquido:b.data.liquido,
+        empresa:b.data.empresa||"",
         banco:p.banco||"",codBanco:p.codBanco||"",cuenta:p.cuenta||p.n_cuenta||"",tipo:p.tipo||p.tipo_cuenta||"",email:p.email||""
       };
     }),
@@ -2532,7 +2533,7 @@ function descargarNomina(id){
   var h13="Glosa cartola beneficiario (opcional, solo aplica si cuenta destino es Santander)";
   var rows=[[h1,h2,h3,h4,h5,h6,h7,h8,h9,h10,h11,h12,h13]];
   n.items.forEach(function(it){
-    var glosa="Pago B. Honorario N°"+it.boleta+" "+it.nombre.substring(0,30);
+    var emp=it.empresa?it.empresa.substring(0,20)+" - ":"";var glosa=emp+"Pago B. Honorario N°"+it.boleta+" "+it.nombre.substring(0,25);
     rows.push([
       CUENTA_ORIGEN,"CLP",it.cuenta,"CLP",
       it.codBanco||"",it.rut,it.nombre.substring(0,40),
