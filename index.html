@@ -2437,33 +2437,17 @@ function eliminarNomina(id){
   var n=NOMINAS.find(function(x){return x.id==id;});
   if(!n)return;
   if(!confirm("¿Eliminar la nómina "+n.numero+"? Las boletas volverán a Aprobadas."))return;
-  // Return boletas to Aprobadas
+  // Return boletas to Aprobadas — ONLY those with this exact nomina number
   var num=n.numero;
+  var restored=0;
   DATA.forEach(function(r){
-    if(r.nomina===num){
+    if(r.nomina===num&&r.pagado!=="Si"){
       r.nomina="";
       r.aprobada=true;
+      restored++;
     }
   });
-  // Also check by boletas IDs array
-  if(n.boletas&&n.boletas.length){
-    n.boletas.forEach(function(bid){
-      var r=DATA.find(function(x){return String(x.id)==String(bid);});
-      if(r&&r.pagado!=="Si"){r.nomina="";r.aprobada=true;}
-    });
-  }
-  // Also check by items RUT in case nomina field has different value
-  if(n.items&&n.items.length){
-    n.items.forEach(function(it){
-      var nrut=normalizeRut(it.rut||"");
-      DATA.forEach(function(r){
-        if(normalizeRut(r.rut)===nrut&&r.pagado!=="Si"&&(r.nomina===num||r.nomina===""||!r.aprobada)){
-          r.nomina="";
-          r.aprobada=true;
-        }
-      });
-    });
-  }
+  console.log("Restored by nomina field:",restored);
   NOMINAS=NOMINAS.filter(function(x){return x.id!=id;});
   save();
   filt();kpi();
@@ -2483,8 +2467,21 @@ function pagarNomina(id){
     if(b){
       b.pagado="Si";
       b.nomina=n.numero;
+      b.aprobada=false; // remove from Aprobadas
     }
   });
+  // Also mark by items RUT in case IDs don't match
+  if(n.items&&n.items.length){
+    n.items.forEach(function(it){
+      var nrut=normalizeRut(it.rut||"");
+      DATA.forEach(function(r){
+        if(normalizeRut(r.rut)===nrut&&r.nomina===n.numero){
+          r.pagado="Si";
+          r.aprobada=false;
+        }
+      });
+    });
+  }
   kpi();checkAlerts();save();filt();renderNominas();
   toast("Nómina "+n.numero+" marcada como pagada ✓");
 }
@@ -2655,19 +2652,17 @@ function renderAprobadas(){
 function toggleSelA(cb,id){if(cb.checked)selA.add(String(id));else selA.delete(String(id));renderAprobadas();}
 function clearSelA(){selA=new Set();renderAprobadas();}
 function togAllA(cb){
+  selA=new Set();
   if(cb.checked){
-    // Use DATA index as unique key — r.id can have duplicates
-    DATA.forEach(function(r,i){
-      if(!r.aprobada||!r.nombre||r.nombre==="nan")return;
+    // Only select from fDataA (filtered list) — not all DATA
+    fDataA.forEach(function(r){
+      var i=DATA.indexOf(r);
+      if(i<0)return;
       var prov2=findProveedor(r.rut);
-      if(!prov2){
-        var normR=normalizeRut(r.rut);
-        prov2=PROVEEDORES.find(function(p){return normalizeRut(p.rut)===normR;});
-      }
       var hasBanco=!!(prov2&&prov2.banco&&(prov2.cuenta||prov2.n_cuenta));
       if(hasBanco)selA.add("idx_"+i);
     });
-  } else selA=new Set();
+  }
   renderAprobadas();
 }
 function aprobarSel(){
