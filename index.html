@@ -985,6 +985,24 @@ function tryAutoLogin(){
   }, 500);
 }
 
+function connectGoogleSilent(cb){
+  if(typeof google==="undefined"){if(cb)cb(false);return;}
+  try{
+    var client=google.accounts.oauth2.initTokenClient({
+      client_id:CLIENT_ID,scope:SCOPES,prompt:"none",
+      callback:function(resp){
+        if(!resp.error){
+          gToken=resp.access_token;
+          localStorage.setItem("tk_gtoken",gToken);
+          if(cb)cb(true);
+        } else {if(cb)cb(false);}
+      },
+      error_callback:function(){if(cb)cb(false);}
+    });
+    client.requestAccessToken({prompt:"none"});
+  }catch(e){if(cb)cb(false);}
+}
+
 function autoRefreshToken(cb){
   var savedUser=localStorage.getItem("tk_u");
   if(!savedUser||typeof google==="undefined"){if(cb)cb(false);return;}
@@ -1010,7 +1028,7 @@ function startTokenRefreshTimer(){
     autoRefreshToken(function(ok){
       if(ok)console.log("Token renovado automáticamente");
     });
-  }, 45*60*1000);
+  }, 30*60*1000);
 }
 
 function initGoogleClient(){
@@ -1054,10 +1072,16 @@ function sheetsReq(method,path,body,cb){
   fetch(url,opts).then(function(r){
     if(r.status===401){
       gToken=null;localStorage.removeItem("tk_gtoken");
-      // Auto-refresh token silently
       autoRefreshToken(function(ok){
-        if(ok){sheetsReq(method,path,body,cb);}
-        else{toast("Sesión expirada — reconectando...");setSave("");}
+        if(ok){
+          sheetsReq(method,path,body,cb); // retry
+        } else {
+          // Try full reconnect silently
+          connectGoogleSilent(function(ok2){
+            if(ok2)sheetsReq(method,path,body,cb);
+            else{setSave("");}
+          });
+        }
       });
       return;
     }
