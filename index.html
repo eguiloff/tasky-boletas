@@ -1428,8 +1428,12 @@ function getCatStyle(v){
 function updPg(i,sel){
   var v=sel.value;
   DATA[i].pagado=v;
+  // If paid or cancelled, remove from Aprobadas
+  if(v==="Si"||v==="Anulada"){
+    DATA[i].aprobada=false;
+  }
   sel.style.cssText=getPgStyle(v);
-  kpi();save();toast("Guardado ✓");
+  kpi();save();checkAlerts();toast("Guardado ✓");
 }
 function catS(i,v){
   var sel='<select class="is" style="'+getCatStyle(v)+'" onchange="updCat('+i+',this)">';
