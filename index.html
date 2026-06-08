@@ -2005,6 +2005,7 @@ function renderMetricas(){
     {lbl:"Promedio por boleta",val:fmt(promedio),ka:"#E07800",kc:"#B85C00"},
     {lbl:"Taskers activos",val:taskers.length,ka:"#6B5CE7",kc:"#6B5CE7"},
     {lbl:"Empresas activas",val:empresasAct.length,ka:"#3730A3",kc:"#3730A3"},
+    {lbl:"Promedio trabajos/tasker",val:taskers.length>0?(d.length/taskers.length).toFixed(1):"0",ka:"#0EA5E9",kc:"#0369A1"},
   ];
   document.getElementById("metResumen").innerHTML=resCards.map(function(c){
     return '<div style="background:#fff;border:1.5px solid var(--b);border-radius:14px;padding:20px 22px;border-left:4px solid '+c.ka+'">'+
