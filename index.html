@@ -610,6 +610,7 @@ input[type=checkbox]{accent-color:var(--p);cursor:pointer;width:14px;height:14px
           <div style="display:flex;gap:4px;margin-bottom:20px;background:var(--pl);padding:4px;border-radius:10px;width:fit-content">
             <button class="stab on" onclick="showSubTab('tasker',this)">Por Tasker</button>
             <button class="stab" onclick="showSubTab('semana',this)">Por Semana</button>
+            <button class="stab" onclick="showSubTab('recurrencia',this)">Recurrencia</button>
             <button class="stab" onclick="showSubTab('empresas',this)">Ranking Empresas</button>
           </div>
           <div id="subtab-tasker">
@@ -621,6 +622,9 @@ input[type=checkbox]{accent-color:var(--p);cursor:pointer;width:14px;height:14px
                 </table>
               </div>
             </div>
+          </div>
+          <div id="subtab-recurrencia" style="display:none">
+            <div id="metRecurrencia"></div>
           </div>
           <div id="subtab-semana" style="display:none">
             <div id="metSemana" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px"></div>
@@ -2039,6 +2043,63 @@ function renderMetricas(){
       '<td style="'+tdStyle+'">'+t.empresas.map(function(e){return '<span style="display:inline-flex;padding:1px 7px;border-radius:12px;background:var(--pl);color:var(--p);font-size:10px;font-weight:600;margin:1px">'+e+'</span>';}).join("")+'</td>'+
     '</tr>';
   }).join("");
+
+  // ── RECURRENCIA ──
+  var recEl=document.getElementById("metRecurrencia");
+  if(recEl){
+    // Sort by empresas count desc, then boletas desc
+    var recArr=taskerArr.slice().sort(function(a,b){
+      if(b.empresas.length!==a.empresas.length)return b.empresas.length-a.empresas.length;
+      return b.boletas-a.boletas;
+    });
+    // Stats
+    var multiEmp=recArr.filter(function(t){return t.empresas.length>1;});
+    var soloUna=recArr.filter(function(t){return t.boletas===1;});
+    var recurrente=recArr.filter(function(t){return t.boletas>=3;});
+    var statsHtml='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px">'+
+      '<div style="background:var(--s);border:1.5px solid var(--pm);border-radius:12px;padding:16px 18px">'+
+        '<div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--t3);margin-bottom:4px">Multi-empresa</div>'+
+        '<div style="font-size:24px;font-weight:700;color:var(--p);font-family:DM Mono,monospace">'+multiEmp.length+'</div>'+
+        '<div style="font-size:11px;color:var(--t3);margin-top:2px">trabajaron en 2+ empresas</div>'+
+      '</div>'+
+      '<div style="background:var(--s);border:1.5px solid #A7F3D0;border-radius:12px;padding:16px 18px">'+
+        '<div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--t3);margin-bottom:4px">Recurrentes</div>'+
+        '<div style="font-size:24px;font-weight:700;color:#059669;font-family:DM Mono,monospace">'+recurrente.length+'</div>'+
+        '<div style="font-size:11px;color:var(--t3);margin-top:2px">3+ boletas emitidas</div>'+
+      '</div>'+
+      '<div style="background:var(--s);border:1.5px solid var(--b);border-radius:12px;padding:16px 18px">'+
+        '<div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--t3);margin-bottom:4px">Solo una vez</div>'+
+        '<div style="font-size:24px;font-weight:700;color:var(--t2);font-family:DM Mono,monospace">'+soloUna.length+'</div>'+
+        '<div style="font-size:11px;color:var(--t3);margin-top:2px">1 sola boleta emitida</div>'+
+      '</div>'+
+    '</div>';
+    // Table
+    var tableHtml='<div style="background:var(--s);border:1px solid var(--b);border-radius:14px;overflow:hidden;box-shadow:var(--shadow)">'+
+      '<div style="overflow-x:auto;max-height:480px;overflow-y:auto">'+
+      '<table style="width:100%;border-collapse:collapse;font-size:12px;min-width:600px">'+
+      '<thead style="position:sticky;top:0;z-index:2"><tr style="background:var(--bg)">'+
+      ['Tasker','Boletas','Empresas','Monto total','Recurrencia'].map(function(h){
+        return '<th style="'+thStyle+'">'+h+'</th>';
+      }).join("")+
+      '</tr></thead><tbody>'+
+      recArr.map(function(t,idx){
+        var rec=t.boletas>=5?"🔥 Alta":t.boletas>=3?"✓ Media":"· Baja";
+        var recColor=t.boletas>=5?"#DC2626":t.boletas>=3?"#059669":"var(--t3)";
+        var multiColor=t.empresas.length>1?"var(--p)":"var(--t3)";
+        return '<tr style="background:'+(idx%2===0?"#fff":"var(--bg)")+'">' +
+          '<td style="'+tdStyle+';font-weight:600">'+t.nombre+'</td>'+
+          '<td style="'+tdMono+';color:var(--p);font-weight:700;text-align:center">'+t.boletas+'</td>'+
+          '<td style="'+tdStyle+'">'+
+            '<span style="font-weight:700;color:'+multiColor+';margin-right:6px">'+t.empresas.length+'</span>'+
+            t.empresas.slice(0,3).map(function(e){return '<span style="background:var(--pl);color:var(--p);border-radius:10px;padding:1px 7px;font-size:10px;font-weight:600;margin:1px;display:inline-block">'+e+'</span>';}).join("")+
+            (t.empresas.length>3?'<span style="color:var(--t3);font-size:10px"> +'+( t.empresas.length-3)+' más</span>':"")+'</td>'+
+          '<td style="'+tdMono+';font-weight:600">'+fmt(t.bruto)+'</td>'+
+          '<td style="'+tdStyle+';font-weight:600;color:'+recColor+'">'+rec+'</td>'+
+        '</tr>';
+      }).join("")+
+      '</tbody></table></div></div>';
+    recEl.innerHTML=statsHtml+tableHtml;
+  }
 
   // ── POR SEMANA ──
   var semMap={};
