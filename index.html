@@ -606,7 +606,8 @@ input[type=checkbox]{accent-color:var(--p);cursor:pointer;width:14px;height:14px
               <option value="">Todos los meses</option>
             </select>
           </div>
-          <div id="metResumen" style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:24px"></div>
+          <div id="metResumen" style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:14px"></div>
+          <div id="metExtra" style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:24px"></div>
           <div style="display:flex;gap:4px;margin-bottom:20px;background:var(--pl);padding:4px;border-radius:10px;width:fit-content">
             <button class="stab on" onclick="showSubTab('tasker',this)">Por Tasker</button>
             <button class="stab" onclick="showSubTab('semana',this)">Por Semana</button>
@@ -2007,6 +2008,71 @@ function renderMetricas(){
     {lbl:"Empresas activas",val:empresasAct.length,ka:"#3730A3",kc:"#3730A3"},
     {lbl:"Promedio trabajos/tasker",val:taskers.length>0?(d.length/taskers.length).toFixed(1):"0",ka:"#0EA5E9",kc:"#0369A1"},
   ];
+
+  // Taskers nuevos vs recurrentes
+  // "Nuevo" = solo tiene boletas en el mes seleccionado (o 1 boleta en total si no hay mes)
+  var todosLosRuts={};
+  DATA.filter(function(r){return r.nombre&&r.nombre!=="nan"&&r.estado!=="ANUL"&&(!r.empresa||r.empresa.toUpperCase()!=="TASKY");})
+    .forEach(function(r){
+      var rut=normalizeRut(r.rut||"");
+      if(!todosLosRuts[rut])todosLosRuts[rut]=[];
+      // Normalize fecha to YYYY-MM
+      var f=(r.fecha||"").trim();
+      var dm=f.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+      var ym=f.match(/(\d{4})-(\d{2})/);
+      var mesR=dm?dm[3]+"-"+(parseInt(dm[2])<10?"0":"")+parseInt(dm[2]):(ym?ym[0]:"");
+      todosLosRuts[rut].push(mesR);
+    });
+  var nuevos=0,recurrentes=0;
+  taskers.forEach(function(rut){
+    var nrut=normalizeRut(rut);
+    var historial=todosLosRuts[nrut]||[];
+    var mesSel=mes||"";
+    if(mesSel){
+      // Nuevo = solo tiene boletas en este mes
+      var otrosMeses=historial.filter(function(m){return m&&m!==mesSel;});
+      if(otrosMeses.length===0)nuevos++;else recurrentes++;
+    } else {
+      if(historial.length<=1)nuevos++;else recurrentes++;
+    }
+  });
+
+  // Días promedio entre emisión y pago
+  var pagadasConFecha=d.filter(function(r){return r.pagado==="Si"&&r.fechaPago&&r.fecha;});
+  var totalDias=0,countDias=0;
+  pagadasConFecha.forEach(function(r){
+    var parseF=function(s){
+      var dm2=s.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+      var ym2=s.match(/(\d{4})-(\d{2})-(\d{2})/);
+      if(dm2)return new Date(dm2[3],parseInt(dm2[2])-1,parseInt(dm2[1]));
+      if(ym2)return new Date(ym2[1],parseInt(ym2[2])-1,parseInt(ym2[3]));
+      return null;
+    };
+    var fe=parseF(r.fecha),fp=parseF(r.fechaPago);
+    if(fe&&fp&&fp>=fe){totalDias+=(fp-fe)/(1000*60*60*24);countDias++;}
+  });
+  var promDias=countDias>0?Math.round(totalDias/countDias):0;
+
+  // Add extra KPIs after the main cards
+  var extraEl=document.getElementById("metExtra");
+  if(extraEl){
+    extraEl.innerHTML=
+      '<div style="background:#fff;border:1.5px solid var(--b);border-radius:14px;padding:18px 22px;border-left:4px solid #10B981">'+
+        '<div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--t3);margin-bottom:5px">Taskers nuevos este mes</div>'+
+        '<div style="font-size:24px;font-weight:700;color:#059669;font-family:DM Mono,monospace">'+nuevos+'</div>'+
+        '<div style="font-size:11px;color:var(--t3);margin-top:3px">Sin boletas en meses anteriores</div>'+
+      '</div>'+
+      '<div style="background:#fff;border:1.5px solid var(--b);border-radius:14px;padding:18px 22px;border-left:4px solid #6B5CE7">'+
+        '<div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--t3);margin-bottom:5px">Taskers recurrentes</div>'+
+        '<div style="font-size:24px;font-weight:700;color:var(--p);font-family:DM Mono,monospace">'+recurrentes+'</div>'+
+        '<div style="font-size:11px;color:var(--t3);margin-top:3px">Con boletas en meses anteriores</div>'+
+      '</div>'+
+      '<div style="background:#fff;border:1.5px solid var(--b);border-radius:14px;padding:18px 22px;border-left:4px solid #F59E0B">'+
+        '<div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--t3);margin-bottom:5px">Días prom. emisión→pago</div>'+
+        '<div style="font-size:24px;font-weight:700;color:#D97706;font-family:DM Mono,monospace">'+(promDias>0?promDias+"d":"—")+'</div>'+
+        '<div style="font-size:11px;color:var(--t3);margin-top:3px">Basado en '+countDias+' boletas con fecha pago</div>'+
+      '</div>';
+  }
   document.getElementById("metResumen").innerHTML=resCards.map(function(c){
     return '<div style="background:#fff;border:1.5px solid var(--b);border-radius:14px;padding:20px 22px;border-left:4px solid '+c.ka+'">'+
       '<div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--t3);margin-bottom:5px">'+c.lbl+'</div>'+
