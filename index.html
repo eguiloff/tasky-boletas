@@ -606,7 +606,8 @@ input[type=checkbox]{accent-color:var(--p);cursor:pointer;width:14px;height:14px
               <option value="">Todos los meses</option>
             </select>
           </div>
-          <div id="metResumen" style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:24px"></div>
+          <div id="metResumen" style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:14px"></div>
+          <div id="metExtra" style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:24px"></div>
           <div style="display:flex;gap:4px;margin-bottom:20px;background:var(--pl);padding:4px;border-radius:10px;width:fit-content">
             <button class="stab on" onclick="showSubTab('tasker',this)">Por Tasker</button>
             <button class="stab" onclick="showSubTab('semana',this)">Por Semana</button>
@@ -2013,6 +2014,68 @@ function renderMetricas(){
       '<div style="font-size:24px;font-weight:700;color:'+c.kc+';font-family:DM Mono,monospace;letter-spacing:-1.5px;margin-top:4px">'+c.val+'</div>'+
     '</div>';
   }).join("");
+
+  // ── EXTRA KPIs ──
+  (function(){
+    var mesSel=document.getElementById("metMes")?document.getElementById("metMes").value:"";
+
+    // Nuevos vs recurrentes
+    var historialPorRut={};
+    DATA.forEach(function(r){
+      if(!r.nombre||r.nombre==="nan"||r.estado==="ANUL")return;
+      if(r.empresa&&r.empresa.toUpperCase()==="TASKY")return;
+      var rut=normalizeRut(r.rut||"");
+      if(!historialPorRut[rut])historialPorRut[rut]=[];
+      var f=(r.fecha||"").trim();
+      var dm=f.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+      var ym=f.match(/^(\d{4})-(\d{2})/);
+      var m=dm?(dm[3]+"-"+(parseInt(dm[2])<10?"0":"")+parseInt(dm[2])):(ym?ym[1]+"-"+ym[2]:"");
+      if(m&&historialPorRut[rut].indexOf(m)<0)historialPorRut[rut].push(m);
+    });
+    var nuevos=0,recurrentes=0;
+    // Get taskers in current filtered data
+    var rutsMes=[];
+    d.forEach(function(r){if(r.rut&&rutsMes.indexOf(normalizeRut(r.rut))<0)rutsMes.push(normalizeRut(r.rut));});
+    rutsMes.forEach(function(rut){
+      var hist=historialPorRut[rut]||[];
+      if(mesSel){
+        var otros=hist.filter(function(m){return m!==mesSel;});
+        if(otros.length===0)nuevos++;else recurrentes++;
+      } else {
+        if(hist.length<=1)nuevos++;else recurrentes++;
+      }
+    });
+
+    // Días promedio emisión→pago
+    var totalDias=0,countDias=0;
+    d.forEach(function(r){
+      if(r.pagado!=="Si"||!r.fechaPago||!r.fecha)return;
+      var pF=function(s){
+        var dm2=s.trim().match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+        var ym2=s.trim().match(/^(\d{4})-(\d{2})-(\d{2})/);
+        if(dm2)return new Date(parseInt(dm2[3]),parseInt(dm2[2])-1,parseInt(dm2[1]));
+        if(ym2)return new Date(parseInt(ym2[1]),parseInt(ym2[2])-1,parseInt(ym2[3]));
+        return null;
+      };
+      var fe=pF(r.fecha),fp=pF(r.fechaPago);
+      if(fe&&fp&&fp>=fe){totalDias+=(fp-fe)/86400000;countDias++;}
+    });
+    var promDias=countDias>0?Math.round(totalDias/countDias):0;
+
+    var el=document.getElementById("metExtra");
+    if(!el)return;
+    var card=function(lbl,val,sub,color){
+      return '<div style="background:#fff;border:1.5px solid var(--b);border-radius:14px;padding:18px 22px;border-left:4px solid '+color+'">'+
+        '<div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--t3);margin-bottom:4px">'+lbl+'</div>'+
+        '<div style="font-size:26px;font-weight:700;color:'+color+';font-family:DM Mono,monospace;letter-spacing:-1px">'+val+'</div>'+
+        '<div style="font-size:11px;color:var(--t3);margin-top:3px">'+sub+'</div>'+
+      '</div>';
+    };
+    el.innerHTML=
+      card("Taskers nuevos",nuevos,"Primera vez este mes","#059669")+
+      card("Taskers recurrentes",recurrentes,"Ya trabajaron antes","#6B5CE7")+
+      card("Días prom. emisión→pago",promDias>0?promDias+"d":"—","Basado en "+countDias+" boletas","#D97706");
+  })();
 
   // ── POR TASKER ──
   var taskerMap={};
