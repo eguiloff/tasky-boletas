@@ -1945,13 +1945,22 @@ function updMetMes(){
 
 function getMetData(){
   var mes=document.getElementById("metMes")?document.getElementById("metMes").value:"";
+  // Deduplicate by id first, then filter
+  var seen={};
   return DATA.filter(function(r){
     if(r.estado==="ANUL")return false;
+    if(!r.nombre||r.nombre==="nan")return false;
+    // Exclude internal Tasky boletas
+    if(r.empresa&&r.empresa.toUpperCase()==="TASKY")return false;
+    // Deduplicate by id
+    var uid=String(r.id||r.boleta+r.rut+r.fecha);
+    if(seen[uid])return false;
+    seen[uid]=true;
     if(!mes)return true;
     var f=(r.fecha||"").replace(" 00:00:00","");
     var parts=f.split("/");
     var key;
-    if(parts.length===3) key=parts[2]+"-"+parts[1];
+    if(parts.length===3) key=parts[2]+"-"+(parts[1].length<2?"0":"")+parseInt(parts[1]);
     else if(f.indexOf("-")>-1) key=f.substring(0,7);
     else return false;
     return key===mes;
