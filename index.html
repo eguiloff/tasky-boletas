@@ -371,8 +371,9 @@ input[type=checkbox]{accent-color:var(--p);cursor:pointer;width:14px;height:14px
             </div>
             <div id="emp-empty" style="display:none;text-align:center;padding:48px;color:var(--t3)">
               <div style="font-size:32px;margin-bottom:10px">🔍</div>
-              <div style="font-size:14px;font-weight:500">Sin resultados</div>
-              <div style="font-size:12px;margin-top:4px">Prueba con otros filtros</div>
+              <div style="font-size:14px;font-weight:500" id="emp-empty-t">Sin resultados</div>
+              <div style="font-size:12px;margin-top:4px" id="emp-empty-s">Prueba con otros filtros</div>
+              <button id="emp-empty-btn" onclick="connectGoogle()" style="display:none;margin-top:14px;background:var(--p);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">Conectar con Google Sheets</button>
             </div>
           </div>
           <div class="pgr" id="pgr"></div>
@@ -775,22 +776,9 @@ window.addEventListener("load",function(){
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
-var SEED=[{id:0,boleta:"10",estado:"VIG",fecha:"03/05/2026",rut:"21148116-1",nombre:"FLORENCIA PAZ PEREZ ESPARZA",bruto:25000,retencion:3813,liquido:21187,empresa:"EXTRALIFE",pagado:"Pendiente",empresaPago:"Pendiente",nomina:"",categoria:"B2B"},{id:1,boleta:"6",estado:"VIG",fecha:"03/05/2026",rut:"21585400-0",nombre:"TONKA MARGARITA SIMUNOVIC REBO",bruto:24000,retencion:3660,liquido:20340,empresa:"RUBRA",pagado:"Pendiente",empresaPago:"Si",nomina:"",categoria:"B2B"},{id:2,boleta:"5",estado:"VIG",fecha:"03/05/2026",rut:"22242203-5",nombre:"RAFAEL ALEJANDRO ZENKLUSSEN AL",bruto:28000,retencion:4270,liquido:23730,empresa:"FAZT",pagado:"Si",empresaPago:"Si",nomina:"1234",categoria:"B2B"},{id:3,boleta:"6",estado:"VIG",fecha:"03/05/2026",rut:"22251536-K",nombre:"ALONSO FERNANDO ABARCA FIERRO",bruto:27500,retencion:4194,liquido:23306,empresa:"EARLY",pagado:"Pendiente",empresaPago:"Pendiente",nomina:"",categoria:"B2B"},{id:4,boleta:"1",estado:"VIG",fecha:"04/05/2026",rut:"21533926-2",nombre:"FRANCISCA PAZ CASTRO SANHUEZA",bruto:42000,retencion:6405,liquido:35595,empresa:"IMPORTADORA HEVIA",pagado:"Si",empresaPago:"Si",nomina:"5678",categoria:"B2C"},{id:5,boleta:"7",estado:"VIG",fecha:"04/05/2026",rut:"21670088-0",nombre:"BALTAZAR CHACON GALVEZ",bruto:82950,retencion:12650,liquido:70300,empresa:"BCOMMS",pagado:"Pendiente",empresaPago:"Pendiente",nomina:"",categoria:"B2B"},{id:6,boleta:"3",estado:"VIG",fecha:"04/05/2026",rut:"21823611-1",nombre:"TABATA KUSCEVIC PRIETO",bruto:66000,retencion:10065,liquido:55935,empresa:"BCOMMS",pagado:"Pendiente",empresaPago:"Pendiente",nomina:"",categoria:"B2B"},{id:7,boleta:"27",estado:"VIG",fecha:"05/05/2026",rut:"18408049-4",nombre:"MARCELO ANDRES MORALES BRICENO",bruto:42000,retencion:6405,liquido:35595,empresa:"IMPORTADORA HEVIA",pagado:"Si",empresaPago:"Si",nomina:"5678",categoria:"B2C"},{id:8,boleta:"7",estado:"VIG",fecha:"05/05/2026",rut:"20297336-1",nombre:"JORGE IGNACIO ALVAREZ RODRIGUE",bruto:84000,retencion:12810,liquido:71190,empresa:"IMPORTADORA HEVIA",pagado:"Si",empresaPago:"Si",nomina:"5678",categoria:"B2C"},{id:9,boleta:"21",estado:"VIG",fecha:"05/05/2026",rut:"21534018-K",nombre:"ANTONIA FERNANDA PAVEZ URBINA",bruto:210000,retencion:32025,liquido:177975,empresa:"THE WALLAS GROUP",pagado:"Pendiente",empresaPago:"Pendiente",nomina:"",categoria:"B2B"},{id:10,boleta:"108",estado:"VIG",fecha:"05/05/2026",rut:"21751283-2",nombre:"VALENTINA ANDREA ZAVALA PONCE",bruto:290345,retencion:44278,liquido:246067,empresa:"B2C",pagado:"Si",empresaPago:"Pendiente",nomina:"",categoria:"B2C"},{id:11,boleta:"1",estado:"VIG",fecha:"05/05/2026",rut:"21960021-6",nombre:"CLARA FERNANDEZ DE ROTA RILLON",bruto:30000,retencion:4575,liquido:25425,empresa:"CENCOSUD",pagado:"Pendiente",empresaPago:"Pendiente",nomina:"",categoria:"B2C"},{id:12,boleta:"80",estado:"ANUL",fecha:"07/05/2026",rut:"20117693-K",nombre:"JOAQUIN EMILIO ESTEVEZ OSORIO",bruto:236600,retencion:36082,liquido:200518,empresa:"FAZT",pagado:"Anulada",empresaPago:"Si",nomina:"",categoria:""},{id:13,boleta:"82",estado:"VIG",fecha:"15/05/2026",rut:"20117693-K",nombre:"JOAQUIN EMILIO ESTEVEZ OSORIO",bruto:244389,retencion:37269,liquido:207120,empresa:"FAZT",pagado:"Pendiente",empresaPago:"Si",nomina:"",categoria:"B2B"},{id:14,boleta:"149",estado:"VIG",fecha:"12/05/2026",rut:"19955297-K",nombre:"CATALINA PAZ ILLESCA FARINA",bruto:192500,retencion:29356,liquido:163144,empresa:"CENCOSUD",pagado:"Pendiente",empresaPago:"Pendiente",nomina:"",categoria:"B2C"},{id:15,boleta:"4",estado:"VIG",fecha:"12/05/2026",rut:"19961478-9",nombre:"GERALDINE CINDY RIVEROS DIAZ",bruto:314000,retencion:47885,liquido:266115,empresa:"CENCOSUD",pagado:"Pendiente",empresaPago:"Pendiente",nomina:"",categoria:"B2C"},{id:16,boleta:"37",estado:"VIG",fecha:"12/05/2026",rut:"20781036-3",nombre:"FRANCHESCA ANTONIA ORELLANA VE",bruto:275000,retencion:41938,liquido:233062,empresa:"CENCOSUD",pagado:"Pendiente",empresaPago:"Pendiente",nomina:"",categoria:"B2C"},{id:17,boleta:"29",estado:"VIG",fecha:"16/05/2026",rut:"20946195-1",nombre:"CAMILA ISIDORA DROGUETT ZEGERS",bruto:44000,retencion:6710,liquido:37290,empresa:"TELRAD CHILE SA",pagado:"Pendiente",empresaPago:"Pendiente",nomina:"",categoria:"B2B"},{id:18,boleta:"7",estado:"VIG",fecha:"19/05/2026",rut:"20552352-9",nombre:"LYSETTE TIARE MORAN ALVAREZ",bruto:44000,retencion:6710,liquido:37290,empresa:"TELRAD CHILE SA",pagado:"Pendiente",empresaPago:"Pendiente",nomina:"",categoria:"B2B"},{id:19,boleta:"36",estado:"VIG",fecha:"30/05/2026",rut:"21314169-4",nombre:"CRISTOBAL ALEJANDRO SALAZAR HI",bruto:18600,retencion:2837,liquido:15763,empresa:"EARLY",pagado:"Pendiente",empresaPago:"Pendiente",nomina:"",categoria:"B2B"}];
+var SEED=[];
 
-var SEED_EMP=[
-  {id:1,nombre:"EXTRALIFE",categoria:"B2B",contacto:""},
-  {id:2,nombre:"RUBRA",categoria:"B2B",contacto:""},
-  {id:3,nombre:"FAZT",categoria:"B2B",contacto:""},
-  {id:4,nombre:"EARLY",categoria:"B2B",contacto:""},
-  {id:5,nombre:"IMPORTADORA HEVIA",categoria:"B2C",contacto:""},
-  {id:6,nombre:"BCOMMS",categoria:"B2B",contacto:""},
-  {id:7,nombre:"THE WALLAS GROUP",categoria:"B2B",contacto:""},
-  {id:8,nombre:"CENCOSUD",categoria:"B2C",contacto:""},
-  {id:9,nombre:"TELRAD CHILE SA",categoria:"B2B",contacto:""},
-  {id:10,nombre:"SANTA RITA",categoria:"B2C",contacto:""},
-  {id:11,nombre:"CANTECH",categoria:"B2B",contacto:""},
-  {id:12,nombre:"WOPERTY",categoria:"B2C",contacto:""}
-];
+var SEED_EMP=[];
 
 var DATA=SEED.map(function(r){return Object.assign({},r);}),fData=[],page=1,sel=new Set(),sf="fecha",sdir=1;
 var EMPRESAS=SEED_EMP.map(function(r){return Object.assign({},r);});
@@ -1051,13 +1039,21 @@ function initGoogleClient(){
   }catch(e){}
 }
 function signOut(){
-  localStorage.removeItem("tk_u");
-  localStorage.removeItem("tk_gtoken");
+  // Revocar token ANTES de anularlo
+  var tk=gToken||localStorage.getItem("tk_gtoken")||"";
+  if(typeof google!=="undefined"&&tk){
+    try{google.accounts.oauth2.revoke(tk,function(){});}catch(e){}
+  }
+  // Limpiar TODA la informacion local de la app
+  ["tk_u","tk_email","tk_gtoken","tk_d","tk_e","tk_p","tk_n","tk_f"].forEach(function(k){
+    localStorage.removeItem(k);
+  });
   gToken=null;
-  DATA=[];EMPRESAS=[];
+  // Vaciar datos en memoria
+  DATA=[];EMPRESAS=[];PROVEEDORES=[];NOMINAS=[];FACTURAS=[];
+  fData=[];fDataA=[];sel=new Set();selA=new Set();
   document.getElementById("ma").style.display="none";
   document.getElementById("aw").style.display="flex";
-  if(typeof google!=="undefined")google.accounts.oauth2.revoke(gToken||"",function(){});
 }
 window.addEventListener("DOMContentLoaded",function(){tryAutoLogin();});
 
@@ -1200,8 +1196,12 @@ function loadD(){
         if(!obj.id)obj.id=Date.now()+Math.random();
         return obj;
       }).filter(function(r){return r.nombre&&r.nombre!="nan"&&r.boleta&&String(r.boleta).indexOf("TOTAL")<0;});
+    } else if(res&&res.values){
+      DATA=[]; // Sheet vacio — sin datos
     } else {
-      DATA=SEED.map(function(r){return Object.assign({},r);});
+      // Respuesta fallida (token/red) — no cargar nada, reintentar conexion
+      DATA=[];
+      setSave("");
     }
     // Load empresas
     sheetsReq("GET","/values/"+SHEET_EMPRESAS+"!A1:Z",null,function(res2){
@@ -1212,7 +1212,7 @@ function loadD(){
           return obj;
         });
       } else {
-        EMPRESAS=SEED_EMP.map(function(r){return Object.assign({},r);});
+        EMPRESAS=[];
       }
       // Load Proveedores from Sheets
       sheetsReq("GET","/values/"+SHEET_PROVEEDORES+"!A1:Z",null,function(rp){
@@ -1226,7 +1226,7 @@ function loadD(){
           var p=localStorage.getItem("tk_p");
           if(p){try{PROVEEDORES=JSON.parse(p);}catch(e){PROVEEDORES=[];}}
         }
-        // Load Facturas from Sheets
+        // Load Facturas from Sheets, then Nominas (en serie)
         sheetsReq("GET","/values/"+SHEET_FACTURAS+"!A1:Z",null,function(rf){
           if(rf&&rf.values&&rf.values.length>1){
             var hf=rf.values[0];
@@ -1241,7 +1241,6 @@ function loadD(){
               return obj;
             }).filter(function(f){return f.numero;});
           } else {FACTURAS=[];}
-        });
         // Load Nominas from Sheets
         sheetsReq("GET","/values/"+SHEET_NOMINAS+"!A1:Z",null,function(rn){
           if(rn&&rn.values&&rn.values.length>1){
@@ -1261,6 +1260,7 @@ function loadD(){
           }
           setSave("ok");updE();updMes();filt();kpi();checkAlerts();syncProveedoresFromData();updNavBadges();
         });
+        });
       });
     });
   });
@@ -1268,11 +1268,11 @@ function loadD(){
 
 function loadFromLocal(){
   var d=localStorage.getItem("tk_d");
-  if(d){try{DATA=JSON.parse(d);}catch(e){DATA=SEED.map(function(r){return Object.assign({},r);});}}
-  else{DATA=SEED.map(function(r){return Object.assign({},r);});}
+  if(d){try{DATA=JSON.parse(d);}catch(e){DATA=[];}}
+  else{DATA=[];}
   var e=localStorage.getItem("tk_e");
-  if(e){try{EMPRESAS=JSON.parse(e);}catch(x){EMPRESAS=SEED_EMP.map(function(r){return Object.assign({},r);});}}
-  else{EMPRESAS=SEED_EMP.map(function(r){return Object.assign({},r);});}
+  if(e){try{EMPRESAS=JSON.parse(e);}catch(x){EMPRESAS=[];}}
+  else{EMPRESAS=[];}
   DATA=DATA.filter(function(r){return r.nombre&&r.nombre!="nan"&&r.boleta&&String(r.boleta).indexOf("TOTAL")<0;});
   var p=localStorage.getItem("tk_p");
   if(p){try{PROVEEDORES=JSON.parse(p);}catch(e){PROVEEDORES=[];}}
@@ -1582,7 +1582,23 @@ function render(){
   if(page>pgs)page=pgs;
   var sl=fData.slice((page-1)*PG,page*PG);
   var tb=document.getElementById("tb"),em=document.getElementById("emp-empty");
-  if(!sl.length){tb.innerHTML="";em.style.display="block";}
+  if(!sl.length){
+    tb.innerHTML="";em.style.display="block";
+    var et=document.getElementById("emp-empty-t"),es=document.getElementById("emp-empty-s"),eb=document.getElementById("emp-empty-btn");
+    if(DATA.length===0&&!gToken){
+      if(et)et.textContent="Sin conexi\u00f3n a los datos";
+      if(es)es.textContent="Conecta con tu cuenta Google de Tasky para cargar la informaci\u00f3n";
+      if(eb)eb.style.display="inline-block";
+    } else if(DATA.length===0){
+      if(et)et.textContent="Cargando datos...";
+      if(es)es.textContent="Si no cargan, presiona el bot\u00f3n Actualizar";
+      if(eb)eb.style.display="none";
+    } else {
+      if(et)et.textContent="Sin resultados";
+      if(es)es.textContent="Prueba con otros filtros";
+      if(eb)eb.style.display="none";
+    }
+  }
   else{
     em.style.display="none";
     tb.innerHTML=sl.map(function(r){
