@@ -846,6 +846,33 @@ var vincularSelBoletas=new Set();
 var SHEET_PROVEEDORES="Proveedores";
 var SHEET_NOMINAS="Nominas";
 
+var _idCounter=0;
+function genId(){
+  // ID entero único: timestamp en ms * 1000 + contador. Nunca decimales, nunca colisiona.
+  _idCounter=(_idCounter+1)%1000;
+  return Date.now()*1000+_idCounter;
+}
+function sameId(a,b){
+  // Comparacion robusta de IDs (string vs number, con o sin decimales viejos)
+  if(a==null||b==null)return false;
+  var na=String(a).split(".")[0], nb=String(b).split(".")[0];
+  return na===nb;
+}
+var GLOBAL_BANCOS=[
+  {c:"1",n:"Banco de Chile - Edwards"},{c:"9",n:"Banco Internacional"},{c:"12",n:"Banco Estado"},
+  {c:"14",n:"Banco Scotiabank"},{c:"16",n:"Banco de Crédito e Inversiones (BCI)"},{c:"27",n:"Banco Corpbanca"},
+  {c:"28",n:"Banco BICE"},{c:"31",n:"Banco HSBC"},{c:"37",n:"Banco Santander"},{c:"39",n:"Banco Itaú"},
+  {c:"41",n:"JP Morgan"},{c:"49",n:"Banco Security"},{c:"51",n:"Banco Falabella"},{c:"53",n:"Banco Ripley"},
+  {c:"55",n:"Banco Consorcio"},{c:"60",n:"China Construction Bank"},{c:"61",n:"Bank of China"},
+  {c:"504",n:"Banco BBVA"},{c:"507",n:"Banco del Desarrollo"},{c:"672",n:"Banco Coopeuch"},
+  {c:"729",n:"Los Heroes"},{c:"730",n:"Tenpo"},{c:"732",n:"TAPP Caja Los Andes"},{c:"741",n:"Copec"},
+  {c:"874",n:"Mercado Pago"},{c:"875",n:"Mercado Pago Emisora"}
+];
+function codBancoDe(nombre){
+  if(!nombre)return "";
+  var f=GLOBAL_BANCOS.find(function(b){return b.n===nombre;});
+  return f?f.c:"";
+}
 function fmt(n){return "$"+Math.round(n||0).toLocaleString("es-CL");}
 function ff(s){return (s||"").replace(" 00:00:00","").replace(/^(\d{4})-(\d{2})-(\d{2})$/,"$3/$2/$1");}
 
@@ -1195,7 +1222,7 @@ function loadD(){
         if(!obj.pagado)obj.pagado="Pendiente";
         if(!obj.empresaPago)obj.empresaPago="Pendiente";
         if(!obj.estado)obj.estado="VIG";
-        if(!obj.id)obj.id=Date.now()+Math.random();
+        if(!obj.id)obj.id=genId();
         return obj;
       }).filter(function(r){return r.nombre&&r.nombre!="nan"&&r.boleta&&String(r.boleta).indexOf("TOTAL")<0;});
     } else if(res&&res.values){
@@ -1678,7 +1705,7 @@ function addEmpresa(){
   if(dup){toast("Ya existe esa empresa");return;}
   var cat=document.getElementById("empCat").value;
   var con=document.getElementById("empContacto").value.trim();
-  EMPRESAS.push({id:Date.now(),nombre:n.toUpperCase(),categoria:cat,contacto:con});
+  EMPRESAS.push({id:genId(),nombre:n.toUpperCase(),categoria:cat,contacto:con});
   document.getElementById("empNombre").value="";
   document.getElementById("empContacto").value="";
   save();renderEmpresas();updE();updMes();filt();toast("Empresa agregada ✓");
@@ -1828,7 +1855,7 @@ function mergeSIIData(newRows){
       updated++;
     } else {
       DATA.push({
-        id:Date.now()+Math.random(),
+        id:genId(),
         boleta:nboleta,estado:nr.estado,fecha:nfecha,
         rut:nr.rut,nombre:nr.nombre,
         bruto:nr.bruto,retencion:nr.retencion,liquido:nr.liquido,
@@ -1853,7 +1880,7 @@ function importF(inp){
 function parseL(txt,fn){
   var res=Papa.parse(txt,{header:true,skipEmptyLines:true});
   var parsed=res.data.map(function(r,i){
-    return {id:Date.now()+i,boleta:r["N° Boleta"]||r["boleta"]||"",estado:r["Estado"]||"VIG",fecha:normFecha(r["Fecha"]||r["fecha"]||""),
+    return {id:genId(),boleta:r["N° Boleta"]||r["boleta"]||"",estado:r["Estado"]||"VIG",fecha:normFecha(r["Fecha"]||r["fecha"]||""),
       rut:r["RUT Emisor"]||r["RUT"]||r["rut"]||"",nombre:r["Nombre / Razón Social"]||r["Nombre"]||r["nombre"]||"",
       bruto:parseFloat((r["Brutos"]||r["bruto"]||"0").toString().replace(/[^0-9.-]/g,""))||0,
       retencion:parseFloat((r["Retención"]||r["Retencion"]||"0").toString().replace(/[^0-9.-]/g,""))||0,
@@ -1903,7 +1930,7 @@ function parseL(txt,fn){
     }
   });
   newEmps.forEach(function(n){
-    EMPRESAS.push({id:Date.now()+Math.random(),nombre:n,categoria:"",contacto:""});
+    EMPRESAS.push({id:genId(),nombre:n,categoria:"",contacto:""});
   });
   updE();updMes();filt();kpi();save();
   toast(added+" nuevas, "+updated+" actualizadas"+(newEmps.length?" · "+newEmps.length+" empresa"+(newEmps.length!=1?"s":"")+" nueva"+(newEmps.length!=1?"s":""):""));
@@ -2488,20 +2515,21 @@ function buildNomina(selBoletas){
   });
   var num="NOM-"+(maxN+1).toString().padStart(3,"0");
   var nomina={
-    id:Date.now(),
+    id:genId(),
     numero:num,
     fecha:new Date().toLocaleDateString("es-CL"),
     estado:"Pendiente",
     boletas:selBoletas.map(function(b){return b.data.id;}),
     items:selBoletas.map(function(b){
       var p=findProveedor(b.data.rut)||{};
+      var cb=p.codBanco||codBancoDe(p.banco||"");
       return {
         rut:normalizeRut(b.data.rut),
         nombre:b.data.nombre,
         boleta:b.data.boleta,
         liquido:b.data.liquido,
         empresa:b.data.empresa||"",
-        banco:p.banco||"",codBanco:p.codBanco||"",cuenta:p.cuenta||p.n_cuenta||"",tipo:p.tipo||p.tipo_cuenta||"",email:p.email||""
+        banco:p.banco||"",codBanco:cb,cuenta:p.cuenta||p.n_cuenta||"",tipo:p.tipo||p.tipo_cuenta||"",email:p.email||""
       };
     }),
     total:selBoletas.reduce(function(s,b){return s+(b.data.liquido||0);},0)
@@ -2603,10 +2631,10 @@ function renderNominas(){
   });
 }
 function eliminarNomina(id){
-  var n=NOMINAS.find(function(x){return x.id==id;});
+  var n=NOMINAS.find(function(x){return sameId(x.id,id);});
   if(!n)return;
   if(!confirm("¿Eliminar la nómina "+n.numero+"? Las boletas volverán a Aprobadas."))return;
-  // Return boletas to Aprobadas — ONLY those with this exact nomina number
+  // Devolver a Aprobadas SOLO las boletas de esta nomina exacta (por numero, no pagadas)
   var num=n.numero;
   var restored=0;
   DATA.forEach(function(r){
@@ -2616,8 +2644,7 @@ function eliminarNomina(id){
       restored++;
     }
   });
-  console.log("Restored by nomina field:",restored);
-  NOMINAS=NOMINAS.filter(function(x){return x.id!=id;});
+  NOMINAS=NOMINAS.filter(function(x){return !sameId(x.id,id);});
   save();
   filt();kpi();
   updAproE();updAproMes();filtA();kpiApro();
@@ -2627,36 +2654,31 @@ function eliminarNomina(id){
 }
 
 function pagarNomina(id){
-  var n=NOMINAS.find(function(x){return x.id==id;});
+  var n=NOMINAS.find(function(x){return sameId(x.id,id);});
   if(!n)return;
   n.estado="Pagada";
-  // Mark all boletas as paid
-  n.boletas.forEach(function(bid){
-    var b=DATA.find(function(x){return x.id==bid;});
-    if(b){
+  var pagadas=0;
+  // Pagar SOLO las boletas que pertenecen a esta nomina (por su numero, que es unico y estable)
+  DATA.forEach(function(b){
+    if(b.nomina===n.numero){
       b.pagado="Si";
-      b.nomina=n.numero;
-      b.aprobada=false; // remove from Aprobadas
+      b.aprobada=false;
+      pagadas++;
     }
   });
-  // Also mark by items RUT in case IDs don't match
-  if(n.items&&n.items.length){
-    n.items.forEach(function(it){
-      var nrut=normalizeRut(it.rut||"");
-      DATA.forEach(function(r){
-        if(normalizeRut(r.rut)===nrut&&r.nomina===n.numero){
-          r.pagado="Si";
-          r.aprobada=false;
-        }
-      });
+  // Respaldo: si por algun motivo el numero no quedo asignado, usar los IDs de la nomina
+  if(pagadas===0&&n.boletas&&n.boletas.length){
+    n.boletas.forEach(function(bid){
+      var b=DATA.find(function(x){return sameId(x.id,bid);});
+      if(b){b.pagado="Si";b.nomina=n.numero;b.aprobada=false;pagadas++;}
     });
   }
   kpi();checkAlerts();save();filt();renderNominas();
-  toast("Nómina "+n.numero+" marcada como pagada ✓");
+  toast("Nómina "+n.numero+" pagada — "+pagadas+" boletas ✓");
 }
 
 function descargarNomina(id){
-  var n=NOMINAS.find(function(x){return x.id==id;});
+  var n=NOMINAS.find(function(x){return sameId(x.id,id);});
   if(!n)return;
   var h1="Cuenta origen (obligatorio)";
   var h2="Moneda origen (obligatorio)";
@@ -2906,34 +2928,7 @@ function openModProv(rut, nombre, onSaved){
   var existMod=document.getElementById("modProvApro");
   if(existMod)existMod.remove();
   var p=findProveedor(rut)||{rut:rut,nombre:nombre||rut,banco:"",n_cuenta:"",tipo_cuenta:"Cuenta Corriente"};
-  var BANCOS_LIST=[
-    {c:"1",n:"Banco de Chile - Edwards"},
-    {c:"9",n:"Banco Internacional"},
-    {c:"12",n:"Banco Estado"},
-    {c:"14",n:"Banco Scotiabank"},
-    {c:"16",n:"Banco de Crédito e Inversiones (BCI)"},
-    {c:"27",n:"Banco Corpbanca"},
-    {c:"28",n:"Banco BICE"},
-    {c:"31",n:"Banco HSBC"},
-    {c:"37",n:"Banco Santander"},
-    {c:"39",n:"Banco Itaú"},
-    {c:"41",n:"JP Morgan"},
-    {c:"49",n:"Banco Security"},
-    {c:"51",n:"Banco Falabella"},
-    {c:"53",n:"Banco Ripley"},
-    {c:"55",n:"Banco Consorcio"},
-    {c:"60",n:"China Construction Bank"},
-    {c:"61",n:"Bank of China"},
-    {c:"504",n:"Banco BBVA"},
-    {c:"507",n:"Banco del Desarrollo"},
-    {c:"672",n:"Banco Coopeuch"},
-    {c:"729",n:"Los Heroes"},
-    {c:"730",n:"Tenpo"},
-    {c:"732",n:"TAPP Caja Los Andes"},
-    {c:"741",n:"Copec"},
-    {c:"874",n:"Mercado Pago"},
-    {c:"875",n:"Mercado Pago Emisora"}
-  ];
+  var BANCOS_LIST=GLOBAL_BANCOS;
   var TIPOS_LIST=["Cuenta Corriente","Cuenta Vista","Cuenta de Ahorro","Cuenta RUT"];
   var mod=document.createElement("div");
   mod.id="modProvApro";
@@ -2972,11 +2967,8 @@ function guardarBancoApro(rut){
   var email=(document.getElementById("apEmail")||{}).value||"";
   email=email.trim();
   if(!banco||!cuenta){toast("Completa banco y número de cuenta");return;}
-  // Get codBanco from BANCOS_LIST
-  var codBanco="";
-  if(typeof BANCOS_LIST!=="undefined"){
-    BANCOS_LIST.forEach(function(b){if(b.n===banco)codBanco=b.c;});
-  }
+  // Get codBanco (funcion global, siempre disponible)
+  var codBanco=codBancoDe(banco);
   // Update or create proveedor
   var found=false;
   PROVEEDORES.forEach(function(p){
